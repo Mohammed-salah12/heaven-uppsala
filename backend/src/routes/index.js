@@ -1,0 +1,24 @@
+const express = require('express');
+const router = express.Router();
+
+const { listLanguages, getSite, getPage } = require('../controllers/siteController');
+const { addLanguage, updateLanguage, upsertTranslation } = require('../controllers/adminController');
+const { createInquiry, createSubscriber, listInquiries, listSubscribers } = require('../controllers/formController');
+const adminAuth = require('../middleware/adminAuth');
+
+// ── Public ────────────────────────────────────────────────
+router.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+router.get('/languages', listLanguages);
+router.get('/site', getSite);
+router.get('/page/:slug', getPage);
+router.post('/inquiries', createInquiry);
+router.post('/subscribers', createSubscriber);
+
+// ── Admin (require x-admin-token header) ──────────────────
+router.post('/admin/languages', adminAuth, addLanguage);
+router.patch('/admin/languages/:code', adminAuth, updateLanguage);
+router.put('/admin/translations/:model/:key', adminAuth, upsertTranslation);
+router.get('/admin/inquiries', adminAuth, listInquiries);
+router.get('/admin/subscribers', adminAuth, listSubscribers);
+
+module.exports = router;

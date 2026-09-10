@@ -1,0 +1,15 @@
+# Local MongoDB for development — no Atlas account needed.
+#   docker compose up -d
+# Then in backend/.env:  MONGODB_URI=mongodb://127.0.0.1:27017/heaven
+services:
+  mongo:
+    image: mongo:7
+    container_name: heaven-mongo
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - heaven_mongo_data:/data/db
+
+volumes:
+  heaven_mongo_data:
