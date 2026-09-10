@@ -1,4 +1,4 @@
-import { buildSite, buildPage } from './site';
+import { buildSite, buildPage, buildMenu } from './site';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 // STATIC mode = no backend; content is embedded and resolved in the browser.
@@ -26,6 +26,12 @@ export function getSite(lang) {
 export function getPage(slug, lang) {
   if (STATIC) return Promise.resolve(buildPage(slug, lang));
   return getJSON(`/page/${encodeURIComponent(slug)}${lang ? `?lang=${encodeURIComponent(lang)}` : ''}`);
+}
+
+/** The real, structured menu (dishes/drinks/wines) for "mat-meny" or "drink-meny". */
+export function getMenu(page, lang) {
+  if (STATIC) return Promise.resolve(buildMenu(page, lang));
+  return getJSON(`/menu/${encodeURIComponent(page)}${lang ? `?lang=${encodeURIComponent(lang)}` : ''}`);
 }
 
 export { API_URL, STATIC };

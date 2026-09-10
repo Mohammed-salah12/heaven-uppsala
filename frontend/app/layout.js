@@ -1,5 +1,7 @@
 import './globals.css';
 import { LangProvider } from '@/context/LangProvider';
+import { BookingProvider } from '@/context/BookingProvider';
+import { MenuChoiceProvider } from '@/context/MenuChoiceProvider';
 
 export const metadata = {
   title: 'Restaurang Heaven — Churrasco i Uppsala',
@@ -24,7 +26,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <LangProvider>{children}</LangProvider>
+        <LangProvider>
+          <BookingProvider>
+            <MenuChoiceProvider>{children}</MenuChoiceProvider>
+          </BookingProvider>
+        </LangProvider>
       </body>
     </html>
   );

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { API_URL } from '@/lib/api';
 
-const TABS = ['Inquiries', 'Subscribers', 'Languages', 'Translations'];
+const TABS = ['Inquiries', 'Subscribers', 'Menu', 'Languages', 'Translations'];
 
 export default function Admin() {
   const [token, setToken] = useState('');
@@ -44,6 +44,11 @@ export default function Admin() {
         const r = await fetch(`${API_URL}/languages`);
         const j = await r.json();
         setData((d) => ({ ...d, languages: j }));
+      } else if (tab === 'Menu') {
+        const r = await authFetch('/admin/menu-items');
+        if (r.status === 401) { setAuthed(false); return; }
+        const j = await r.json();
+        setData((d) => ({ ...d, menuItems: j }));
       }
     } catch (e) { setStatus('Could not reach the API.'); }
   }, [tab, authFetch]);
@@ -96,6 +101,7 @@ export default function Admin() {
 
         {tab === 'Inquiries' && <Inquiries rows={data.inquiries} onRefresh={load} />}
         {tab === 'Subscribers' && <Subscribers rows={data.subscribers} onRefresh={load} />}
+        {tab === 'Menu' && <MenuItems rows={data.menuItems} authFetch={authFetch} reload={load} setStatus={setStatus} />}
         {tab === 'Languages' && <Languages rows={data.languages} authFetch={authFetch} reload={load} setStatus={setStatus} />}
         {tab === 'Translations' && <Translations authFetch={authFetch} setStatus={setStatus} />}
       </main>
@@ -177,6 +183,106 @@ function Languages({ rows, authFetch, reload, setStatus }) {
             <select value={form.dir} onChange={set('dir')}><option value="ltr">Left-to-right</option><option value="rtl">Right-to-left</option></select>
           </label>
           <button className="btn btn-gold" type="submit">Add language</button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+const MENU_LANGS = ['sv', 'en', 'pt'];
+const EMPTY_MENU_FORM = {
+  page: 'mat-meny', group: '', groupOrder: 1, order: 1, price: '',
+  translations: { sv: { name: '', description: '' }, en: { name: '', description: '' }, pt: { name: '', description: '' } },
+};
+
+function MenuItems({ rows, authFetch, reload, setStatus }) {
+  const [form, setForm] = useState(EMPTY_MENU_FORM);
+  const [editingId, setEditingId] = useState(null);
+
+  function startAdd() { setForm(EMPTY_MENU_FORM); setEditingId(null); }
+  function startEdit(item) {
+    setEditingId(item._id);
+    setForm({
+      page: item.page, group: item.group, groupOrder: item.groupOrder || 0, order: item.order || 0, price: item.price || '',
+      translations: MENU_LANGS.reduce((acc, l) => {
+        const t = (item.translations && item.translations[l]) || {};
+        acc[l] = { name: t.name || '', description: t.description || '' };
+        return acc;
+      }, {}),
+    });
+    window.scrollTo({ top: document.querySelector('.admin-form')?.offsetTop - 90 || 0, behavior: 'smooth' });
+  }
+  const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const setLangField = (lang, k) => (e) => setForm((f) => ({ ...f, translations: { ...f.translations, [lang]: { ...f.translations[lang], [k]: e.target.value } } }));
+
+  async function save(e) {
+    e.preventDefault();
+    const body = { ...form, groupOrder: Number(form.groupOrder) || 0, order: Number(form.order) || 0 };
+    const r = editingId
+      ? await authFetch(`/admin/menu-items/${editingId}`, { method: 'PUT', body: JSON.stringify(body) })
+      : await authFetch('/admin/menu-items', { method: 'POST', body: JSON.stringify(body) });
+    const b = await r.json();
+    if (r.ok) { setStatus(editingId ? 'Menu item updated.' : 'Menu item added.'); startAdd(); reload(); }
+    else setStatus(b.error || 'Save failed.');
+  }
+  async function remove(id) {
+    if (!window.confirm('Delete this menu item?')) return;
+    const r = await authFetch(`/admin/menu-items/${id}`, { method: 'DELETE' });
+    if (r.ok) { if (editingId === id) startAdd(); reload(); } else setStatus('Delete failed.');
+  }
+
+  return (
+    <section>
+      <div className="admin-head"><h2>Menu items</h2><button className="btn btn-outline sm" onClick={reload}>Refresh</button></div>
+      <p className="muted">
+        The real dishes, drinks and wines shown on Mat meny / Drink meny — grouped by <code>group</code> (e.g. <code>buffet</code>, <code>wineGlassRed</code>).
+        A group's display heading is set once as a UI string under <code>menu.group.&lt;group&gt;</code> in the Translations tab.
+      </p>
+      {!rows ? <p className="muted">Loading…</p> : (
+        <div className="table-wrap"><table>
+          <thead><tr><th>Page</th><th>Group</th><th>Order</th><th>Name (sv)</th><th>Price</th><th></th></tr></thead>
+          <tbody>{rows.map((r) => (
+            <tr key={r._id}>
+              <td>{r.page}</td><td>{r.group}</td><td>{r.groupOrder}.{r.order}</td>
+              <td>{(r.translations && r.translations.sv && r.translations.sv.name) || ''}</td>
+              <td>{r.price}</td>
+              <td style={{ whiteSpace: 'nowrap' }}>
+                <button className="btn btn-outline sm" onClick={() => startEdit(r)}>Edit</button>{' '}
+                <button className="btn btn-outline sm" onClick={() => remove(r._id)}>Delete</button>
+              </td>
+            </tr>
+          ))}</tbody>
+        </table></div>
+      )}
+
+      <form className="admin-form" onSubmit={save}>
+        <h3>{editingId ? 'Edit menu item' : 'Add a menu item'}</h3>
+        <div className="grid4">
+          <label>Page
+            <select value={form.page} onChange={setField('page')}>
+              <option value="mat-meny">mat-meny</option><option value="drink-meny">drink-meny</option>
+            </select>
+          </label>
+          <input placeholder="Group key (e.g. buffet)" value={form.group} onChange={setField('group')} required />
+          <input type="number" placeholder="Group order" value={form.groupOrder} onChange={setField('groupOrder')} />
+          <input type="number" placeholder="Order in group" value={form.order} onChange={setField('order')} />
+        </div>
+        <input placeholder='Price (free text, e.g. "159 kr" or "99/395 kr")' value={form.price} onChange={setField('price')} />
+
+        {MENU_LANGS.map((l) => (
+          <div key={l} className="row" style={{ alignItems: 'flex-start' }}>
+            <label style={{ flex: 1 }}>{`Name (${l})`}
+              <input value={form.translations[l].name} onChange={setLangField(l, 'name')} />
+            </label>
+            <label style={{ flex: 2 }}>{`Description (${l})`}
+              <textarea rows="2" value={form.translations[l].description} onChange={setLangField(l, 'description')} />
+            </label>
+          </div>
+        ))}
+
+        <div className="row">
+          <button className="btn btn-gold" type="submit">{editingId ? 'Save changes' : 'Add menu item'}</button>
+          {editingId && <button className="btn btn-outline" type="button" onClick={startAdd}>Cancel edit</button>}
         </div>
       </form>
     </section>

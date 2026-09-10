@@ -1,7 +1,7 @@
 // Build the same payloads the Express API returns, but from embedded content —
 // so the site works with NO backend (static GitHub Pages deploy).
 import { pick, resolveDoc, mapToObject } from './resolve';
-import { languages as LANGS, setting, locations as LOCS, pages as PAGES, ui as UI } from './content';
+import { languages as LANGS, setting, locations as LOCS, pages as PAGES, menuItems as MENU_ITEMS, ui as UI } from './content';
 
 const enabled = LANGS.filter((l) => l.enabled !== false).sort((a, b) => a.sortOrder - b.sortOrder);
 const defaultLang = (enabled.find((l) => l.isDefault) || {}).code || 'sv';
@@ -70,3 +70,30 @@ export function buildPage(slug, lang) {
 }
 
 export const CONTENT_SLUGS = PAGES.filter((p) => !p.isAnchor).map((p) => p.slug);
+
+/**
+ * The real, structured menu (dishes/drinks/wines) for "mat-meny" or
+ * "drink-meny" — mirrors the Express `getMenu` controller exactly, resolved
+ * purely from embedded content so it works with zero backend.
+ */
+export function buildMenu(page, lang) {
+  const a = activeCode(lang);
+  const ui = buildUi(a);
+  const items = MENU_ITEMS.filter((m) => m.page === page).slice().sort((x, y) => (x.groupOrder - y.groupOrder) || (x.order - y.order));
+
+  const groups = [];
+  const byKey = new Map();
+  items.forEach((item, i) => {
+    const loc = pick(item.translations, a, defaultLang) || {};
+    const resolved = { id: i, order: item.order || 0, price: item.price || '', name: loc.name || '', description: loc.description || '' };
+    if (!byKey.has(item.group)) {
+      const label = ui[`menu.group.${item.group}`] || item.group;
+      const g = { group: item.group, label, groupOrder: item.groupOrder || 0, items: [] };
+      byKey.set(item.group, g);
+      groups.push(g);
+    }
+    byKey.get(item.group).items.push(resolved);
+  });
+  groups.sort((g1, g2) => g1.groupOrder - g2.groupOrder);
+  return groups;
+}

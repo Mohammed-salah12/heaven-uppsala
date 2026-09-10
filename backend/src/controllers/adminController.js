@@ -2,9 +2,10 @@ const Language = require('../models/Language');
 const Location = require('../models/Location');
 const Page = require('../models/Page');
 const UiString = require('../models/UiString');
+const MenuItem = require('../models/MenuItem');
 
 // Models whose top-level `translations` Map is copied when adding a language.
-const MAP_MODELS = [Location, UiString];
+const MAP_MODELS = [Location, UiString, MenuItem];
 
 /**
  * POST /api/admin/languages

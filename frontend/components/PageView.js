@@ -3,6 +3,9 @@ import Hero from './Hero';
 import Blocks from './Blocks';
 import Footer from './Footer';
 import DirManager from './DirManager';
+import BookButton from './BookButton';
+import ExploreMenuButton from './ExploreMenuButton';
+import MenuGroups from './MenuGroups';
 import { API_URL } from '@/lib/api';
 
 function Fallback() {
@@ -22,7 +25,7 @@ npm install && npm run seed && npm run dev`}</pre>
   );
 }
 
-export default function PageView({ site, page }) {
+export default function PageView({ site, page, menu }) {
   if (!site || !page) return <Fallback />;
   const { ui, settings, lang, dir } = site;
   const t = (k) => ui[k] || k;
@@ -30,8 +33,8 @@ export default function PageView({ site, page }) {
 
   const heroCta = (
     <div className="hero-cta">
-      <a className="btn btn-gold" href={settings.bookingUrl} target="_blank" rel="noreferrer">{t('cta.book')}</a>
-      {isHome && <a className="btn btn-outline" href="#buffe">{t('cta.explore')}</a>}
+      <BookButton>{t('cta.book')}</BookButton>
+      {isHome && <ExploreMenuButton>{t('cta.explore')}</ExploreMenuButton>}
     </div>
   );
 
@@ -47,6 +50,7 @@ export default function PageView({ site, page }) {
         video={page.heroVideoUrl}
         cta={heroCta}
       />
+      <MenuGroups groups={menu} />
       <Blocks blocks={page.blocks} site={site} />
       <Footer site={site} />
     </>

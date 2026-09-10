@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useLang } from '@/context/LangProvider';
+import BookButton from './BookButton';
 
 export default function Nav({ site }) {
   const { ui, nav, languages, lang: active, settings } = site;
@@ -64,9 +65,7 @@ export default function Nav({ site }) {
             </div>
           </div>
 
-          <a className="btn btn-gold book-btn" href={settings.bookingUrl} target="_blank" rel="noreferrer">
-            {t('cta.book')}
-          </a>
+          <BookButton className="btn btn-gold book-btn">{t('cta.book')}</BookButton>
 
           <button className="nav-toggle" aria-label="Menu" onClick={() => setMenuOpen((o) => !o)}>
             <span /><span /><span />

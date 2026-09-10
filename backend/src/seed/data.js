@@ -78,6 +78,10 @@ const setting = {
   phone: '018-505500',
   email: 'info@restaurangheaven.se',
   bookingUrl: 'https://widget.thefork.com/a89096bf-a60f-43df-b687-92fe42ae0235',
+  // Optional separate booking link for the à la carte room (Bakfickan). Leave
+  // blank to fall back to `bookingUrl` — drop in Bakfickan's own TheFork/phone
+  // link here later and the "Boka bord" choice modal picks it up automatically.
+  bookingUrlAlaCarte: '',
   logoUrl: media.logo,
   heroImageUrl: media.heroPoster,
   heroVideoUrl: media.heroVideo,
@@ -141,26 +145,26 @@ const pages = [
     slug: 'home', order: 1, inNav: true, navKey: 'nav.home', path: '/', isAnchor: false,
     heroImageUrl: media.heroPoster, heroVideoUrl: media.heroVideo,
     translations: {
-      sv: { title: 'Restaurang Heaven', subtitle: 'Grill • Churrasco' },
-      en: { title: 'Restaurang Heaven', subtitle: 'Grill • Churrasco' },
-      pt: { title: 'Restaurang Heaven', subtitle: 'Grill • Churrasco' },
+      sv: { title: 'This is Heaven', subtitle: 'More than a restaurant. A place to eat, drink, meet & celebrate.' },
+      en: { title: 'This is Heaven', subtitle: 'More than a restaurant. A place to eat, drink, meet & celebrate.' },
+      pt: { title: 'This is Heaven', subtitle: 'More than a restaurant. A place to eat, drink, meet & celebrate.' },
     },
     blocks: [
       B('pricing', { order: 1, anchor: 'buffe', tiers: [
-          { price: '449 kr', highlight: true }, { price: '249 kr' }, { price: '199 kr' }, { price: null },
+          { price: '449 kr', highlight: true }, { price: '269 kr' }, { price: '199 kr' }, { price: null },
         ] },
         {
-          sv: { heading: 'Buffé & priser', subheading: 'Ät så mycket du vill – rakt från grillen', tiers: [
+          sv: { eyebrow: 'Churrasco Rodizio', heading: 'Buffé & priser', subheading: 'Ät så mycket du vill – rakt från grillen', tiers: [
             { name: 'Grillbuffé inkl. vegetarisk buffé', unit: '/ person' },
             { name: 'Endast vegetarisk buffé', unit: '/ person' },
             { name: 'Buffé för barn 7–10 år', unit: '' },
             { name: 'Barn upp till 6 år', price: 'Gratis', unit: 'äter gratis hos oss!' } ] },
-          en: { heading: 'Buffet & prices', subheading: 'All you can eat — straight from the grill', tiers: [
+          en: { eyebrow: 'Churrasco Rodizio', heading: 'Buffet & prices', subheading: 'All you can eat — straight from the grill', tiers: [
             { name: 'Grill buffet incl. vegetarian buffet', unit: '/ person' },
             { name: 'Vegetarian buffet only', unit: '/ person' },
             { name: 'Buffet for children 7–10 yrs', unit: '' },
             { name: 'Children up to 6 yrs', price: 'Free', unit: 'eat free with us!' } ] },
-          pt: { heading: 'Buffet & preços', subheading: 'Coma à vontade — direto da grelha', tiers: [
+          pt: { eyebrow: 'Churrasco Rodizio', heading: 'Buffet & preços', subheading: 'Coma à vontade — direto da grelha', tiers: [
             { name: 'Rodízio na grelha + buffet vegetariano', unit: '/ pessoa' },
             { name: 'Somente buffet vegetariano', unit: '/ pessoa' },
             { name: 'Buffet para crianças 7–10 anos', unit: '' },
@@ -383,14 +387,12 @@ const pages = [
       en: { title: 'Food menu', subtitle: 'Buffet & dessert' },
       pt: { title: 'Cardápio', subtitle: 'Buffet & sobremesa' },
     },
+    // The real dish/dessert list lives in `menuItems` below (rendered by
+    // <MenuGroups>, fetched via getMenu('mat-meny')) — real names, descriptions
+    // and prices, not a photographed "PDF" menu. Admins add/edit items from
+    // the dashboard's Menu tab instead of a designer re-exporting an image.
     blocks: [
-      B('menu', { order: 1, images: [media.buffe, media.dessert] },
-        {
-          sv: { heading: 'Buffé & dessert', note: 'Vår grillbuffé och våra desserter.' },
-          en: { heading: 'Buffet & dessert', note: 'Our grill buffet and desserts.' },
-          pt: { heading: 'Buffet & sobremesa', note: 'Nosso rodízio na grelha e as sobremesas.' },
-        }),
-      B('gallery', { order: 2, images: [media.food1, media.food2, media.food3] },
+      B('gallery', { order: 1, images: [media.food1, media.food2, media.food3] },
         {
           sv: { heading: 'Från buffén' }, en: { heading: 'From the buffet' }, pt: { heading: 'Do buffet' },
         }),
@@ -406,19 +408,172 @@ const pages = [
       en: { title: 'Drinks menu', subtitle: 'Cocktails, wine & beer' },
       pt: { title: 'Bebidas', subtitle: 'Drinques, vinho & cerveja' },
     },
-    blocks: [
-      B('menu', { order: 1, images: [media.drinkar, media.glassList, media.bottleList] },
-        {
-          sv: { heading: 'Drinkar & dryck', note: 'Drinkar, glas- och flasklista.' },
-          en: { heading: 'Drinks list', note: 'Cocktails, by-the-glass and bottle list.' },
-          pt: { heading: 'Bebidas', note: 'Drinques, lista por taça e por garrafa.' },
-        }),
-    ],
+    // Same story as mat-meny: the real drinks/wine list lives in `menuItems`.
+    blocks: [],
   },
 
   // ── Nav-only anchors on the home page ──
   { slug: 'om-oss', order: 7, inNav: true, navKey: 'nav.omoss', path: '/#ourstory', isAnchor: true, translations: {}, blocks: [] },
   { slug: 'kontakt', order: 8, inNav: true, navKey: 'nav.kontakt', path: '/#kontakt', isAnchor: true, translations: {}, blocks: [] },
+];
+
+// helper to keep menu-item definitions compact
+const MI = (page, group, groupOrder, order, price, translations) => ({ page, group, groupOrder, order, price, translations });
+
+// Generic wine blurb reused across most glass/bottle listings (matches the real menu).
+const WINE_BLURB = {
+  sv: 'Fruktig, klassisk, passar till den vegetariska buffén',
+  en: 'Fruity and classic — pairs well with the vegetarian buffet',
+  pt: 'Frutado e clássico — combina bem com o buffet vegetariano',
+};
+
+// ── Menu items (the real dishes/drinks/wines — replaces the old photographed
+// "PDF" menu images). Grouped by `group`; group display labels are the
+// menu.group.* UI strings below. Transcribed from the live menu.
+const menuItems = [
+  // ═══════════════════ MAT MENY — Churrasco buffé ═══════════════════
+  MI('mat-meny', 'buffet', 1, 1, '', {
+    sv: { name: 'Picanha', description: 'Den främsta delen av den översta ryggbiffen. Vår signaturbit, Picanha, representerar konsten och vetenskapen om Churrasco-grill. Lättkryddad med havssalt och mör med en robust smak. Det skulle inte finnas någon Churrasco utan Picanha.' },
+    en: { name: 'Picanha', description: 'The prime cut from the top of the rump. Our signature cut, Picanha, represents the art and science of the Churrasco grill. Lightly seasoned with sea salt, tender, with a robust flavour. There would be no Churrasco without Picanha.' },
+    pt: { name: 'Picanha', description: 'O corte principal da parte superior do coxão duro. Nosso corte de assinatura, a Picanha, representa a arte e a ciência do churrasco. Levemente temperada com sal grosso, macia e de sabor marcante. Não haveria Churrasco sem a Picanha.' },
+  }),
+  MI('mat-meny', 'buffet', 1, 2, '', {
+    sv: { name: 'Ryggbiff', description: 'Ryggbiff är en styckningsdetalj på nötkreatur, närmare bestämt biten mellan entrecoten och rostbiffen på utsidan av ryggraden. Den benämns ibland som "utskuren biff". Om biffen skivas med tillhörande ben och filé kallas det för klubbstek eller enkelbiff.' },
+    en: { name: 'Sirloin Cut (Ryggbiff)', description: "A beef cut — specifically the piece between the entrecôte and the roast beef, on the outside of the spine, sometimes called \"cut steak\". Sliced with the bone and fillet still attached, it's known as a club steak." },
+    pt: { name: 'Corte de Lombo (Ryggbiff)', description: 'Um corte bovino — mais precisamente o pedaço entre o entrecôte e o rosbife, do lado de fora da coluna, às vezes chamado de "bife cortado". Fatiado com o osso e o filé ainda presos, é conhecido como bife clube.' },
+  }),
+  MI('mat-meny', 'buffet', 1, 3, '', {
+    sv: { name: 'Lammrostbiff', description: 'Lammrostbiff eller sadelbit är en styckdetalj av lamm som består av lammstekens översta del och som ibland styckas separat. Den kan styckas som stor eller liten och med eller utan kappa. Lammrostbiff är egentligen en slags fin ministek.' },
+    en: { name: 'Lamb Rump (Lammrostbiff)', description: 'A lamb cut from the top of the leg, sometimes carved off separately. It can be cut large or small, with or without the fat cap — really a fine little steak in its own right.' },
+    pt: { name: 'Lombo de Cordeiro (Lammrostbiff)', description: 'Um corte de cordeiro da parte superior da perna, às vezes retirado separadamente. Pode ser cortado grande ou pequeno, com ou sem a capa de gordura — na prática, um belo miniposte.' },
+  }),
+  MI('mat-meny', 'buffet', 1, 4, '', {
+    sv: { name: 'Jalapeño-korv', description: 'Kryddkorv fylld med emmentalerost och jalapeno som gör den krämig och fyllig med en tydlig hetta. Den är grovmalen och rökt vilket passar utmärkt till grillbuffén men som också gör att den kan stå på egna ben.' },
+    en: { name: 'Jalapeño Sausage', description: 'A spiced sausage filled with Emmental cheese and jalapeño, giving it a creamy, full body with a clear kick of heat. Coarsely ground and smoked — perfect alongside the grill buffet, but easily holds its own too.' },
+    pt: { name: 'Linguiça de Jalapeño', description: 'Linguiça temperada recheada com queijo emmental e jalapeño, o que a deixa cremosa e encorpada, com um toque de picância evidente. Moída grosseiramente e defumada — combina perfeitamente com o buffet de grelha, mas também se sustenta muito bem sozinha.' },
+  }),
+  MI('mat-meny', 'buffet', 1, 5, '', {
+    sv: { name: 'Chorizo', description: 'Chorizo är en kryddstarkare varmrökt korv som är smaksatt med vitlök, cayenne och paprika. En favorit bland våra kryddiga korvar - perfekt på grillen! Våra korvar innehåller bara svenskt kött från svenska gårdar.' },
+    en: { name: 'Chorizo', description: 'A spicier, hot-smoked sausage seasoned with garlic, cayenne and paprika. A favourite among our spiced sausages — perfect off the grill! Our sausages are made with Swedish meat from Swedish farms only.' },
+    pt: { name: 'Chorizo', description: 'Uma linguiça defumada mais apimentada, temperada com alho, pimenta caiena e páprica. Uma favorita entre nossas linguiças picantes — perfeita na grelha! Nossas linguiças usam apenas carne sueca de fazendas suecas.' },
+  }),
+  MI('mat-meny', 'buffet', 1, 6, '', {
+    sv: { name: 'Chicken Drumsticks Barbecue', description: 'Kycklingklubba marinerad med paprika, cayennepeppar, grillkrydda, vitlök, persilja & gurkmeja. Detta är ett elegant sätt att förhöja smakerna på en annars allmän köttdetalj.' },
+    en: { name: 'Chicken Drumsticks Barbecue', description: 'Chicken drumstick marinated with paprika, cayenne pepper, grill seasoning, garlic, parsley & turmeric — an elegant way to lift the flavour of an otherwise everyday cut.' },
+    pt: { name: 'Coxinha de Frango Barbecue', description: 'Coxinha de frango marinada com páprica, pimenta caiena, tempero para churrasco, alho, salsa e cúrcuma — uma forma elegante de realçar o sabor de um corte, de outra forma, comum.' },
+  }),
+
+  // ── Desserts ──
+  MI('mat-meny', 'dessert', 2, 1, '129 kr', {
+    sv: { name: 'Chokladpaj', description: 'Belgisk choklad, vegansk, gluten- & laktosfri.' },
+    en: { name: 'Chocolate Pie', description: 'Belgian chocolate, vegan, gluten- & lactose-free.' },
+    pt: { name: 'Torta de Chocolate', description: 'Chocolate belga, vegana, sem glúten e sem lactose.' },
+  }),
+  MI('mat-meny', 'dessert', 2, 2, '129 kr', {
+    sv: { name: 'Keylime', description: 'Laktosfri amerikansk dessert som görs på keylimesaft, äggulor, och kondenserad mjölk i ett pajskal.' },
+    en: { name: 'Key Lime Pie', description: 'A lactose-free American dessert made with key lime juice, egg yolks and condensed milk in a pie crust.' },
+    pt: { name: 'Torta de Key Lime', description: 'Sobremesa americana sem lactose, feita com suco de key lime, gemas de ovo e leite condensado em uma massa de torta.' },
+  }),
+  MI('mat-meny', 'dessert', 2, 3, '299 kr', {
+    sv: { name: 'Ost & Chark', description: 'En blandning av imponerande och lokala smakrika ostar.' },
+    en: { name: 'Cheese & Charcuterie', description: 'A selection of impressive, locally sourced, flavourful cheeses.' },
+    pt: { name: 'Queijos & Frios', description: 'Uma seleção de queijos impressionantes, locais e cheios de sabor.' },
+  }),
+  MI('mat-meny', 'dessert', 2, 4, '129 kr', {
+    sv: { name: 'Kaffe & Avec', description: 'Kaffe & 4 cl Boulard Calvados.' },
+    en: { name: 'Coffee & Avec', description: 'Coffee & 4 cl Boulard Calvados.' },
+    pt: { name: 'Café & Avec', description: 'Café & 4 cl de Boulard Calvados.' },
+  }),
+
+  // ═══════════════════ DRINK MENY ═══════════════════
+  // ── Heavens signaturdrinkar ──
+  MI('drink-meny', 'signature', 1, 1, '159 kr', {
+    sv: { name: 'Caipirhna', description: 'Cachaça, lime, socker: fräsch, tydlig smak av cachaça.' },
+    en: { name: 'Caipirinha', description: 'Cachaça, lime, sugar — fresh, with a clear cachaça character.' },
+    pt: { name: 'Caipirinha', description: 'Cachaça, limão, açúcar — fresca, com sabor marcante de cachaça.' },
+  }),
+  MI('drink-meny', 'signature', 1, 2, '169 kr', {
+    sv: { name: 'Boss Nova', description: 'Havana Club 3, Apricot Brandy, Amaro Montenegro, lime, äppelmust: komplex, örtig, syrlig.' },
+    en: { name: 'Boss Nova', description: 'Havana Club 3, apricot brandy, Amaro Montenegro, lime, apple juice — complex, herbal, tart.' },
+    pt: { name: 'Boss Nova', description: 'Havana Club 3, apricot brandy, Amaro Montenegro, limão, suco de maçã — complexo, herbáceo, ácido.' },
+  }),
+  MI('drink-meny', 'signature', 1, 3, '169 kr', {
+    sv: { name: 'Maracujá', description: 'Havana Club 7, Italicus Rosolio di Bergamotto, passionfrukt, lime, ginger beer: fruktig, söt och tropisk.' },
+    en: { name: 'Maracujá', description: 'Havana Club 7, Italicus Rosolio di Bergamotto, passion fruit, lime, ginger beer — fruity, sweet and tropical.' },
+    pt: { name: 'Maracujá', description: 'Havana Club 7, Italicus Rosolio di Bergamotto, maracujá, limão, ginger beer — frutado, doce e tropical.' },
+  }),
+
+  // ── Klassiker ──
+  MI('drink-meny', 'classics', 2, 1, '159 kr', {
+    sv: { name: 'Mojito', description: 'Havana Club 3, lime, Cointreau, 7up, mynta.' },
+    en: { name: 'Mojito', description: 'Havana Club 3, lime, Cointreau, 7up, mint.' },
+    pt: { name: 'Mojito', description: 'Havana Club 3, limão, Cointreau, 7up, hortelã.' },
+  }),
+  MI('drink-meny', 'classics', 2, 2, '159 kr', {
+    sv: { name: 'Rum Punch', description: 'Havana Club 3, Plantation Grande Reserve, lime, kokos, apelsin.' },
+    en: { name: 'Rum Punch', description: 'Havana Club 3, Plantation Grande Reserve, lime, coconut, orange.' },
+    pt: { name: 'Rum Punch', description: 'Havana Club 3, Plantation Grande Reserve, limão, coco, laranja.' },
+  }),
+  MI('drink-meny', 'classics', 2, 3, '169 kr', {
+    sv: { name: 'Negroni', description: 'Never Never Juniper Freak, Martini Rosso, Campari.' },
+    en: { name: 'Negroni', description: 'Never Never Juniper Freak, Martini Rosso, Campari.' },
+    pt: { name: 'Negroni', description: 'Never Never Juniper Freak, Martini Rosso, Campari.' },
+  }),
+  MI('drink-meny', 'classics', 2, 4, '179 kr', {
+    sv: { name: 'Singapore Sling', description: 'Never Never Triple Juniper Gin, Cointreau, Cherry Herring, Bénédictine, grenadin, lime, ananas, Angostura.' },
+    en: { name: 'Singapore Sling', description: 'Never Never Triple Juniper Gin, Cointreau, Cherry Herring, Bénédictine, grenadine, lime, pineapple, Angostura bitters.' },
+    pt: { name: 'Singapore Sling', description: 'Never Never Triple Juniper Gin, Cointreau, Cherry Herring, Bénédictine, grenadine, limão, abacaxi, Angostura.' },
+  }),
+
+  // ── Mocktail ──
+  MI('drink-meny', 'mocktail', 3, 1, '99 kr', {
+    sv: { name: 'Green Breeze', description: 'Kiwimonin, lime, äppelmust, Fever-Tree Mediterranean Tonic.' },
+    en: { name: 'Green Breeze', description: 'Kiwi cordial, lime, apple juice, Fever-Tree Mediterranean tonic.' },
+    pt: { name: 'Green Breeze', description: 'Xarope de kiwi, limão, suco de maçã, tônica Fever-Tree Mediterranean.' },
+  }),
+
+  // ── Vinlista på glas (pris: glas/flaska) — RÖTT ──
+  MI('drink-meny', 'wineGlassRed', 4, 1, '99/395 kr', { sv: { name: '2020, Illyrian Pinot Noir, Rahovec, Kosovo', description: WINE_BLURB.sv }, en: { name: '2020, Illyrian Pinot Noir, Rahovec, Kosovo', description: WINE_BLURB.en }, pt: { name: '2020, Illyrian Pinot Noir, Rahovec, Kosovo', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineGlassRed', 4, 2, '109/489 kr', { sv: { name: '2024, Ruberte Garnacha, Aragonien, Spanien', description: WINE_BLURB.sv }, en: { name: '2024, Ruberte Garnacha, Aragon, Spain', description: WINE_BLURB.en }, pt: { name: '2024, Ruberte Garnacha, Aragão, Espanha', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineGlassRed', 4, 3, '125/599 kr', { sv: { name: '2021, Evel Tinto, Douro, Portugal', description: WINE_BLURB.sv }, en: { name: '2021, Evel Tinto, Douro, Portugal', description: WINE_BLURB.en }, pt: { name: '2021, Evel Tinto, Douro, Portugal', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineGlassRed', 4, 4, '135/635 kr', { sv: { name: '2023, Dandy de Cidro Tinto, Douro, Portugal', description: WINE_BLURB.sv }, en: { name: '2023, Dandy de Cidro Tinto, Douro, Portugal', description: WINE_BLURB.en }, pt: { name: '2023, Dandy de Cidro Tinto, Douro, Portugal', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineGlassRed', 4, 5, '159/675 kr', { sv: { name: 'Quinta dos Aciprestes, Douro, Portugal', description: WINE_BLURB.sv }, en: { name: 'Quinta dos Aciprestes, Douro, Portugal', description: WINE_BLURB.en }, pt: { name: 'Quinta dos Aciprestes, Douro, Portugal', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineGlassRed', 4, 6, '169/699 kr', { sv: { name: '2020, Quinta das Carvalhas, Douro, Portugal', description: WINE_BLURB.sv }, en: { name: '2020, Quinta das Carvalhas, Douro, Portugal', description: WINE_BLURB.en }, pt: { name: '2020, Quinta das Carvalhas, Douro, Portugal', description: WINE_BLURB.pt } }),
+
+  // ── Vinlista på glas — VITT ──
+  MI('drink-meny', 'wineGlassWhite', 5, 1, '99/395 kr', { sv: { name: '2024, Porca de Murça, Douro, Portugal', description: '' }, en: { name: '2024, Porca de Murça, Douro, Portugal', description: '' }, pt: { name: '2024, Porca de Murça, Douro, Portugal', description: '' } }),
+  MI('drink-meny', 'wineGlassWhite', 5, 2, '135/635 kr', { sv: { name: '2023, Dandy de Cidro Branco, Douro, Portugal', description: '' }, en: { name: '2023, Dandy de Cidro Branco, Douro, Portugal', description: '' }, pt: { name: '2023, Dandy de Cidro Branco, Douro, Portugal', description: '' } }),
+  MI('drink-meny', 'wineGlassWhite', 5, 3, '149/659 kr', { sv: { name: '2024, Alvarinho de Cidro, Douro, Portugal', description: '' }, en: { name: '2024, Alvarinho de Cidro, Douro, Portugal', description: '' }, pt: { name: '2024, Alvarinho de Cidro, Douro, Portugal', description: '' } }),
+  MI('drink-meny', 'wineGlassWhite', 5, 4, '169/699 kr', { sv: { name: '2023, Riesling-cuvée Oriolus, Leposavić, Serbien', description: '' }, en: { name: '2023, Riesling-cuvée Oriolus, Leposavić, Serbia', description: '' }, pt: { name: '2023, Riesling-cuvée Oriolus, Leposavić, Sérvia', description: '' } }),
+
+  // ── Vinlista på glas — MOUSSERANDE / ROSÉ / SÖTA OCH FORTIFIERADE VINER ──
+  MI('drink-meny', 'wineGlassSparkling', 6, 1, '119/579 kr', { sv: { name: 'NV, Prosecco Nani Rizzi, Valdobbiadene, Italien', description: '' }, en: { name: 'NV, Prosecco Nani Rizzi, Valdobbiadene, Italy', description: '' }, pt: { name: 'NV, Prosecco Nani Rizzi, Valdobbiadene, Itália', description: '' } }),
+  MI('drink-meny', 'wineGlassRose', 7, 1, '119/579 kr', { sv: { name: '2023, Rosé Syrah, Leposavić, Serbien', description: '' }, en: { name: '2023, Rosé Syrah, Leposavić, Serbia', description: '' }, pt: { name: '2023, Rosé Syrah, Leposavić, Sérvia', description: '' } }),
+  MI('drink-meny', 'wineGlassRose', 7, 2, '119/579 kr', { sv: { name: '2023, Domaine Houchart, Côtes de Provence, Frankrike', description: '' }, en: { name: '2023, Domaine Houchart, Côtes de Provence, France', description: '' }, pt: { name: '2023, Domaine Houchart, Côtes de Provence, França', description: '' } }),
+  MI('drink-meny', 'wineGlassDessertWine', 8, 1, '99 kr', { sv: { name: 'NV, Tawny Port, Douro, Portugal', description: '' }, en: { name: 'NV, Tawny Port, Douro, Portugal', description: '' }, pt: { name: 'NV, Tawny Port, Douro, Portugal', description: '' } }),
+  MI('drink-meny', 'wineGlassDessertWine', 8, 2, '119 kr', { sv: { name: '2013, Royal Oporto Colheita, Douro, Portugal', description: '' }, en: { name: '2013, Royal Oporto Colheita, Douro, Portugal', description: '' }, pt: { name: '2013, Royal Oporto Colheita, Douro, Portugal', description: '' } }),
+
+  // ── Vinlista på flaska — RÖTT ──
+  MI('drink-meny', 'wineBottleRed', 9, 1, '550 kr', { sv: { name: '2023, Bricco Angelini Barbera d\'Alba, Piemonte, Italien', description: WINE_BLURB.sv }, en: { name: "2023, Bricco Angelini Barbera d'Alba, Piemonte, Italy", description: WINE_BLURB.en }, pt: { name: "2023, Bricco Angelini Barbera d'Alba, Piemonte, Itália", description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 2, '625 kr', { sv: { name: '2019, Angiolino Spätburgunder, Pfalz, Tyskland', description: WINE_BLURB.sv }, en: { name: '2019, Angiolino Spätburgunder, Pfalz, Germany', description: WINE_BLURB.en }, pt: { name: '2019, Angiolino Spätburgunder, Pfalz, Alemanha', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 3, '659 kr', { sv: { name: '2022, Tarani Malbec, Comté Tolosan, Frankrike', description: WINE_BLURB.sv }, en: { name: '2022, Tarani Malbec, Comté Tolosan, France', description: WINE_BLURB.en }, pt: { name: '2022, Tarani Malbec, Comté Tolosan, França', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 4, '699 kr', { sv: { name: '2019, Bujeu Monferrato Rosso, Piemonte, Italien', description: WINE_BLURB.sv }, en: { name: '2019, Bujeu Monferrato Rosso, Piemonte, Italy', description: WINE_BLURB.en }, pt: { name: '2019, Bujeu Monferrato Rosso, Piemonte, Itália', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 5, '990 kr', { sv: { name: '2022, Domaine du Vieux Lazaret, Châteauneuf-du-Pape, Frankrike', description: WINE_BLURB.sv }, en: { name: '2022, Domaine du Vieux Lazaret, Châteauneuf-du-Pape, France', description: WINE_BLURB.en }, pt: { name: '2022, Domaine du Vieux Lazaret, Châteauneuf-du-Pape, França', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 6, '1050 kr', { sv: { name: '2020, Corte Majoli Amarone della Valpolicella, Italien', description: WINE_BLURB.sv }, en: { name: '2020, Corte Majoli Amarone della Valpolicella, Italy', description: WINE_BLURB.en }, pt: { name: '2020, Corte Majoli Amarone della Valpolicella, Itália', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 7, '1100 kr', { sv: { name: '2019, Séries Malvasia Preta Tinto, Douro, Portugal', description: WINE_BLURB.sv }, en: { name: '2019, Séries Malvasia Preta Tinto, Douro, Portugal', description: WINE_BLURB.en }, pt: { name: '2019, Séries Malvasia Preta Tinto, Douro, Portugal', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 8, '1300 kr', { sv: { name: '2019, Séries Bastardo Tinto, Douro, Portugal', description: WINE_BLURB.sv }, en: { name: '2019, Séries Bastardo Tinto, Douro, Portugal', description: WINE_BLURB.en }, pt: { name: '2019, Séries Bastardo Tinto, Douro, Portugal', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleRed', 9, 9, '2000 kr', { sv: { name: '2017, Quinta dos Aciprestes Grande Reserva, Douro, Portugal', description: WINE_BLURB.sv }, en: { name: '2017, Quinta dos Aciprestes Grande Reserva, Douro, Portugal', description: WINE_BLURB.en }, pt: { name: '2017, Quinta dos Aciprestes Grande Reserva, Douro, Portugal', description: WINE_BLURB.pt } }),
+
+  // ── Vinlista på flaska — VITT ──
+  MI('drink-meny', 'wineBottleWhite', 10, 1, '499 kr', { sv: { name: '2022, Villa Minelli Pinot Grigio, Venezie, Italien', description: WINE_BLURB.sv }, en: { name: '2022, Villa Minelli Pinot Grigio, Venezie, Italy', description: WINE_BLURB.en }, pt: { name: '2022, Villa Minelli Pinot Grigio, Venezie, Itália', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleWhite', 10, 2, '659 kr', { sv: { name: '2022, Caso Valduga Chardonnay, Serra Gaúcha, Brasilien', description: WINE_BLURB.sv }, en: { name: '2022, Caso Valduga Chardonnay, Serra Gaúcha, Brazil', description: WINE_BLURB.en }, pt: { name: '2022, Caso Valduga Chardonnay, Serra Gaúcha, Brasil', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleWhite', 10, 3, '710 kr', { sv: { name: '2021, Petit Chablis, Domaine des Hâtes, Chablis, Frankrike', description: WINE_BLURB.sv }, en: { name: '2021, Petit Chablis, Domaine des Hâtes, Chablis, France', description: WINE_BLURB.en }, pt: { name: '2021, Petit Chablis, Domaine des Hâtes, Chablis, França', description: WINE_BLURB.pt } }),
+  MI('drink-meny', 'wineBottleWhite', 10, 4, '1000 kr', { sv: { name: '2021, Parus Sauvignon Blanc, Leposavić, Serbien', description: WINE_BLURB.sv }, en: { name: '2021, Parus Sauvignon Blanc, Leposavić, Serbia', description: WINE_BLURB.en }, pt: { name: '2021, Parus Sauvignon Blanc, Leposavić, Sérvia', description: WINE_BLURB.pt } }),
+
+  // ── Vinlista på flaska — MOUSSERANDE ──
+  MI('drink-meny', 'wineBottleSparkling', 11, 1, '1250 kr', { sv: { name: 'NV, Marizy Premier Cru Grande Réserve, Champagne, Frankrike', description: '' }, en: { name: 'NV, Marizy Premier Cru Grande Réserve, Champagne, France', description: '' }, pt: { name: 'NV, Marizy Premier Cru Grande Réserve, Champagne, França', description: '' } }),
+  MI('drink-meny', 'wineBottleSparkling', 11, 2, '1300 kr', { sv: { name: 'NV, Superiore di Cartizze D.O.C.G, Prosecco, Italien', description: '' }, en: { name: 'NV, Superiore di Cartizze D.O.C.G, Prosecco, Italy', description: '' }, pt: { name: 'NV, Superiore di Cartizze D.O.C.G, Prosecco, Itália', description: '' } }),
+  MI('drink-meny', 'wineBottleSparkling', 11, 3, '2000 kr', { sv: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, Frankrike', description: '' }, en: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, France', description: '' }, pt: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, França', description: '' } }),
 ];
 
 // ── UI strings (nav, buttons, forms, labels) ──
@@ -436,6 +591,37 @@ const ui = {
   'cta.drinkMenu': { sv: 'Drink meny', en: 'Drinks menu', pt: 'Bebidas' },
   'cta.dropin': { sv: 'Drop in-meny', en: 'Drop-in menu', pt: 'Cardápio drop-in' },
   'cta.explore': { sv: 'Utforska menyn', en: 'Explore the menu', pt: 'Explorar o cardápio' },
+  // "Boka bord" choice modal — asks the guest which dining experience to book.
+  'booking.choose.title': { sv: 'Hur vill du äta?', en: 'How would you like to dine?', pt: 'Como você gostaria de jantar?' },
+  'booking.choose.subtitle': { sv: 'Välj ett upplägg för att gå vidare till bokning.', en: 'Choose an experience to continue to booking.', pt: 'Escolha uma experiência para continuar com a reserva.' },
+  'booking.rodizio.tag': { sv: 'Allt du kan äta', en: 'All-you-can-eat', pt: 'Rodízio à vontade' },
+  'booking.rodizio.name': { sv: 'Churrasco Rodizio', en: 'Churrasco Rodizio', pt: 'Churrasco Rodízio' },
+  'booking.rodizio.desc': { sv: 'Vår klassiska grillbuffé — grillat kött direkt från spettet, salladsbord och tillbehör, serverat i obegränsade mängder.', en: 'Our classic grill buffet — meat carved straight from the skewer, a full salad bar and sides, served in unlimited rounds.', pt: 'Nosso clássico buffet de churrasco — carnes assadas servidas direto do espeto, mesa de saladas e acompanhamentos, à vontade.' },
+  'booking.alacarte.tag': { sv: 'À la carte', en: 'À la carte', pt: 'À la carte' },
+  'booking.alacarte.name': { sv: 'À la carte på Bakfickan', en: 'À la carte at Bakfickan', pt: 'À la carte no Bakfickan' },
+  'booking.alacarte.desc': { sv: 'Vår mysiga avdelning för husmanskost till lunch och en lugnare à la carte-meny på kvällen, med Heavens signaturdrinkar.', en: "Our cosy room for lunchtime home cooking and a relaxed à la carte menu in the evening, with Heaven's signature drinks.", pt: 'Nosso espaço aconchegante para comida caseira no almoço e um menu à la carte mais tranquilo à noite, com os drinques exclusivos do Heaven.' },
+  'booking.continue': { sv: 'Fortsätt till bokning', en: 'Continue to booking', pt: 'Continuar para a reserva' },
+  'booking.close': { sv: 'Stäng', en: 'Close', pt: 'Fechar' },
+  // "Utforska menyn" choice modal — asks whether to view the food or drinks menu.
+  'menu.choose.title': { sv: 'Vilken meny vill du utforska?', en: 'Which menu would you like to explore?', pt: 'Qual cardápio você quer explorar?' },
+  'menu.choose.subtitle': { sv: 'Välj mat eller dryck för att se hela menyn.', en: 'Pick food or drinks to see the full menu.', pt: 'Escolha comida ou bebida para ver o cardápio completo.' },
+  'menu.food.desc': { sv: 'Churrasco-buffén, våra grillrätter och efterrätter.', en: 'The churrasco buffet, our grilled dishes and desserts.', pt: 'O buffet de churrasco, nossos pratos grelhados e sobremesas.' },
+  'menu.drink.desc': { sv: 'Signaturdrinkar, klassiker och vår vinlista.', en: 'Signature cocktails, classics and our wine list.', pt: 'Drinques exclusivos, clássicos e nossa carta de vinhos.' },
+  'menu.continue': { sv: 'Visa menyn', en: 'View menu', pt: 'Ver cardápio' },
+  // Menu item group labels (used by <MenuGroups> to head each section).
+  'menu.group.buffet': { sv: 'Churrasco Rodizio — grillbuffé', en: 'Churrasco Rodizio — grill buffet', pt: 'Churrasco Rodízio — buffet de grelha' },
+  'menu.group.dessert': { sv: 'Efterrätter', en: 'Desserts', pt: 'Sobremesas' },
+  'menu.group.signature': { sv: 'Heavens signaturdrinkar', en: "Heaven's signature drinks", pt: 'Drinques exclusivos do Heaven' },
+  'menu.group.classics': { sv: 'Klassiker', en: 'Classics', pt: 'Clássicos' },
+  'menu.group.mocktail': { sv: 'Mocktail', en: 'Mocktail', pt: 'Mocktail' },
+  'menu.group.wineGlassRed': { sv: 'Vinlista på glas — Rött', en: 'Wine by the glass — Red', pt: 'Vinhos por taça — Tinto' },
+  'menu.group.wineGlassWhite': { sv: 'Vinlista på glas — Vitt', en: 'Wine by the glass — White', pt: 'Vinhos por taça — Branco' },
+  'menu.group.wineGlassSparkling': { sv: 'Vinlista på glas — Mousserande', en: 'Wine by the glass — Sparkling', pt: 'Vinhos por taça — Espumante' },
+  'menu.group.wineGlassRose': { sv: 'Vinlista på glas — Rosé', en: 'Wine by the glass — Rosé', pt: 'Vinhos por taça — Rosé' },
+  'menu.group.wineGlassDessertWine': { sv: 'Vinlista på glas — Söta och fortifierade viner', en: 'Wine by the glass — Sweet & fortified', pt: 'Vinhos por taça — Doces e fortificados' },
+  'menu.group.wineBottleRed': { sv: 'Vinlista på flaska — Rött', en: 'Wine by the bottle — Red', pt: 'Vinhos por garrafa — Tinto' },
+  'menu.group.wineBottleWhite': { sv: 'Vinlista på flaska — Vitt', en: 'Wine by the bottle — White', pt: 'Vinhos por garrafa — Branco' },
+  'menu.group.wineBottleSparkling': { sv: 'Vinlista på flaska — Mousserande', en: 'Wine by the bottle — Sparkling', pt: 'Vinhos por garrafa — Espumante' },
   'label.popular': { sv: 'Populärast', en: 'Most popular', pt: 'Mais popular' },
   'label.contact': { sv: 'Kontakt', en: 'Contact', pt: 'Contato' },
   'label.phone': { sv: 'Telefon', en: 'Phone', pt: 'Telefone' },
@@ -462,4 +648,4 @@ const ui = {
   'form.error': { sv: 'Något gick fel. Försök igen.', en: 'Something went wrong. Please try again.', pt: 'Algo deu errado. Tente novamente.' },
 };
 
-module.exports = { languages, setting, locations, pages, ui };
+module.exports = { languages, setting, locations, pages, menuItems, ui };

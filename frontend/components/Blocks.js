@@ -1,15 +1,16 @@
 import Gallery from './Gallery';
 import NewsletterForm from './NewsletterForm';
 import BookingForm from './BookingForm';
+import BookButton from './BookButton';
 
 /** Renders the CTA button referenced by a block. */
 function Cta({ cta, ui, settings }) {
   if (!cta) return null;
   if (cta === 'book') {
     return (
-      <a className="btn btn-gold" href={settings.bookingUrl} target="_blank" rel="noreferrer" style={{ marginTop: 24 }}>
+      <BookButton className="btn btn-gold" style={{ marginTop: 24 }}>
         {ui['cta.book']}
-      </a>
+      </BookButton>
     );
   }
   if (cta === 'dropin') {
@@ -87,7 +88,7 @@ export default function Blocks({ blocks = [], site }) {
               <section className={`${cls} buffet`} id={id || 'buffe'} key={i}>
                 <div className="container">
                   <div className="head">
-                    <p className="eyebrow center">{t('nav.matmeny')}</p>
+                    {block.eyebrow && <p className="eyebrow center">{block.eyebrow}</p>}
                     <h2 className="display">{block.heading}</h2>
                     {block.subheading && <p className="lead" style={{ margin: '0 auto' }}>{block.subheading}</p>}
                   </div>
@@ -98,6 +99,9 @@ export default function Blocks({ blocks = [], site }) {
                         <div className="amount">{tier.price}</div>
                         {tier.unit ? <div className="unit">{tier.unit}</div> : null}
                         <div className="name">{tier.name}</div>
+                        <BookButton className={`btn ${tier.highlight ? 'btn-gold' : 'btn-outline'} sm price-card-cta`}>
+                          {t('cta.book')}
+                        </BookButton>
                       </div>
                     ))}
                   </div>
@@ -190,9 +194,7 @@ export default function Blocks({ blocks = [], site }) {
                         <a href={`tel:${(settings.phone || '').replace(/\s/g, '')}`}>{settings.phone}</a></div>
                       <div className="contact-line"><span>{t('label.email')}</span>
                         <a href={`mailto:${settings.email}`}>{settings.email}</a></div>
-                      <a className="btn btn-gold" href={settings.bookingUrl} target="_blank" rel="noreferrer" style={{ marginTop: 10 }}>
-                        {t('cta.book')}
-                      </a>
+                      <BookButton style={{ marginTop: 10 }}>{t('cta.book')}</BookButton>
                     </div>
                     <div className="loc-grid">
                       {(locations || []).map((loc) => (

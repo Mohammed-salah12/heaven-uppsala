@@ -11,6 +11,7 @@ const settingSchema = new mongoose.Schema(
     phone: { type: String, default: '' },
     email: { type: String, default: '' },
     bookingUrl: { type: String, default: '' }, // TheFork widget etc.
+    bookingUrlAlaCarte: { type: String, default: '' }, // optional separate link for Bakfickan à la carte; falls back to bookingUrl
     logoUrl: { type: String, default: '' },
     heroImageUrl: { type: String, default: '' },
     heroVideoUrl: { type: String, default: '' }, // background video (mp4)

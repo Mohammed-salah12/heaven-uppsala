@@ -83,10 +83,26 @@ assert.ok(home.blocks.some((b) => b.type === 'contact' && b.anchor === 'kontakt'
 assert.ok(home.blocks.some((b) => b.anchor === 'ourstory'));
 ok('booking + newsletter + contact/ourstory anchors present');
 
-// Menu pages carry the real menu images
-assert.ok(data.pages.find((p) => p.slug === 'mat-meny').blocks.some((b) => b.type === 'menu' && b.images.length >= 2));
-assert.ok(data.pages.find((p) => p.slug === 'drink-meny').blocks.some((b) => b.type === 'menu' && b.images.length >= 3));
-ok('mat-meny + drink-meny carry the menu images');
+// Menu pages carry the real, structured menu items (no more photographed "PDF" menu)
+assert.ok(Array.isArray(data.menuItems) && data.menuItems.length > 40, 'menuItems should be populated');
+assert.ok(!data.pages.find((p) => p.slug === 'mat-meny').blocks.some((b) => b.type === 'menu'), 'mat-meny should not use the old image menu block');
+assert.ok(!data.pages.find((p) => p.slug === 'drink-meny').blocks.some((b) => b.type === 'menu'), 'drink-meny should not use the old image menu block');
+const matItems = data.menuItems.filter((m) => m.page === 'mat-meny');
+const drinkItems = data.menuItems.filter((m) => m.page === 'drink-meny');
+assert.ok(matItems.some((m) => m.group === 'buffet') && matItems.some((m) => m.group === 'dessert'));
+assert.ok(drinkItems.some((m) => m.group === 'signature') && drinkItems.some((m) => m.group.startsWith('wineGlass')) && drinkItems.some((m) => m.group.startsWith('wineBottle')));
+data.menuItems.forEach((m) => {
+  assert.ok(['mat-meny', 'drink-meny'].includes(m.page), 'menuItem.page must be mat-meny or drink-meny');
+  assert.ok(m.group, 'menuItem needs a group');
+  LANGS.forEach((lc) => assert.ok(m.translations[lc] && m.translations[lc].name, `menu item missing ${lc} name`));
+  Object.keys(m.translations).forEach((lc) => assert.ok(m.translations[lc].name, `menu.group.${m.group} label`));
+});
+LANGS.forEach((lc) => {
+  new Set(data.menuItems.map((m) => m.group)).forEach((g) => {
+    assert.ok(data.ui[`menu.group.${g}`] && data.ui[`menu.group.${g}`][lc], `menu.group.${g} missing ${lc} label`);
+  });
+});
+ok(`${data.menuItems.length} menu items (mat-meny + drink-meny) translated, grouped, with labels in all languages`);
 
 // Locations + UI strings
 data.locations.forEach((loc) => LANGS.forEach((lc) => {
@@ -107,8 +123,9 @@ ok('settings: phone, socials (TikTok/IG/FB), hero video');
 // Modules load
 ['../src/models/Language', '../src/models/Setting', '../src/models/Location',
   '../src/models/Page', '../src/models/UiString', '../src/models/Inquiry', '../src/models/Subscriber',
+  '../src/models/MenuItem',
   '../src/controllers/siteController', '../src/controllers/adminController',
-  '../src/controllers/formController', '../src/routes'].forEach((m) => require(m));
+  '../src/controllers/formController', '../src/controllers/menuController', '../src/routes'].forEach((m) => require(m));
 require('../src/server');
 ok('all models, controllers, routes and server load cleanly');
 

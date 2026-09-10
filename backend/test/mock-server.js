@@ -68,6 +68,28 @@ app.get('/api/page/:slug', (req, res) => {
 app.post('/api/inquiries', (req, res) => res.status(201).json({ ok: true, id: 'mock' }));
 app.post('/api/subscribers', (req, res) => res.status(201).json({ ok: true }));
 
+// ── Menu items (in-memory, mirrors menuController.getMenu) ──
+let menuItems = data.menuItems.map((m, i) => ({ ...m, _id: `mi${i}` }));
+app.get('/api/menu/:page', (req, res) => {
+  const page = req.params.page;
+  if (!['mat-meny', 'drink-meny'].includes(page)) return res.status(404).json({ error: 'Unknown menu page' });
+  const a = active((req.query.lang || defaultLang).toLowerCase());
+  const ui = buildUi(a);
+  const items = menuItems.filter((m) => m.page === page).slice().sort((x, y) => (x.groupOrder - y.groupOrder) || (x.order - y.order));
+  const groups = []; const byKey = new Map();
+  items.forEach((item) => {
+    const loc = pick(item.translations, a, defaultLang) || {};
+    const resolved = { id: item._id, order: item.order || 0, price: item.price || '', name: loc.name || '', description: loc.description || '' };
+    if (!byKey.has(item.group)) {
+      const g = { group: item.group, label: ui[`menu.group.${item.group}`] || item.group, groupOrder: item.groupOrder || 0, items: [] };
+      byKey.set(item.group, g); groups.push(g);
+    }
+    byKey.get(item.group).items.push(resolved);
+  });
+  groups.sort((g1, g2) => g1.groupOrder - g2.groupOrder);
+  res.json(groups);
+});
+
 // ── Admin (verification-only, in-memory) ──
 const TOKEN = process.env.ADMIN_TOKEN || 'demo-token';
 const langs = [...enabled];
@@ -94,6 +116,28 @@ app.patch('/api/admin/languages/:code', admin, (req, res) => {
 });
 app.get('/api/languages', (req, res) => res.json(langs));
 app.put('/api/admin/translations/:model/:key', admin, (req, res) => res.json({ ok: true }));
+
+app.get('/api/admin/menu-items', admin, (req, res) => {
+  const items = req.query.page ? menuItems.filter((m) => m.page === req.query.page) : menuItems;
+  res.json(items);
+});
+app.post('/api/admin/menu-items', admin, (req, res) => {
+  const item = { _id: `mi${menuItems.length}-${Date.now()}`, groupOrder: 0, order: 0, price: '', translations: {}, ...req.body };
+  menuItems.push(item);
+  res.status(201).json(item);
+});
+app.put('/api/admin/menu-items/:id', admin, (req, res) => {
+  const item = menuItems.find((m) => m._id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Menu item not found' });
+  Object.assign(item, req.body);
+  res.json(item);
+});
+app.delete('/api/admin/menu-items/:id', admin, (req, res) => {
+  const before = menuItems.length;
+  menuItems = menuItems.filter((m) => m._id !== req.params.id);
+  if (menuItems.length === before) return res.status(404).json({ error: 'Menu item not found' });
+  res.json({ ok: true });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`mock API on ${PORT}`));
