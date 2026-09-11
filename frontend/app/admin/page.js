@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { API_URL } from '@/lib/api';
 
-const TABS = ['Inquiries', 'Subscribers', 'Menu', 'Languages', 'Translations'];
+const TABS = ['Inquiries', 'Subscribers', 'Menu', 'Events', 'Languages', 'Translations'];
 
 export default function Admin() {
   const [token, setToken] = useState('');
@@ -49,6 +49,11 @@ export default function Admin() {
         if (r.status === 401) { setAuthed(false); return; }
         const j = await r.json();
         setData((d) => ({ ...d, menuItems: j }));
+      } else if (tab === 'Events') {
+        const r = await authFetch('/admin/events');
+        if (r.status === 401) { setAuthed(false); return; }
+        const j = await r.json();
+        setData((d) => ({ ...d, events: j }));
       }
     } catch (e) { setStatus('Could not reach the API.'); }
   }, [tab, authFetch]);
@@ -102,6 +107,7 @@ export default function Admin() {
         {tab === 'Inquiries' && <Inquiries rows={data.inquiries} onRefresh={load} />}
         {tab === 'Subscribers' && <Subscribers rows={data.subscribers} onRefresh={load} />}
         {tab === 'Menu' && <MenuItems rows={data.menuItems} authFetch={authFetch} reload={load} setStatus={setStatus} />}
+        {tab === 'Events' && <Events rows={data.events} authFetch={authFetch} reload={load} setStatus={setStatus} />}
         {tab === 'Languages' && <Languages rows={data.languages} authFetch={authFetch} reload={load} setStatus={setStatus} />}
         {tab === 'Translations' && <Translations authFetch={authFetch} setStatus={setStatus} />}
       </main>
@@ -282,6 +288,98 @@ function MenuItems({ rows, authFetch, reload, setStatus }) {
 
         <div className="row">
           <button className="btn btn-gold" type="submit">{editingId ? 'Save changes' : 'Add menu item'}</button>
+          {editingId && <button className="btn btn-outline" type="button" onClick={startAdd}>Cancel edit</button>}
+        </div>
+      </form>
+    </section>
+  );
+}
+
+const EVENT_LANGS = ['sv', 'en', 'pt'];
+const EMPTY_EVENT_FORM = {
+  order: 1, dateLabel: '',
+  translations: { sv: { title: '', description: '' }, en: { title: '', description: '' }, pt: { title: '', description: '' } },
+};
+
+function Events({ rows, authFetch, reload, setStatus }) {
+  const [form, setForm] = useState(EMPTY_EVENT_FORM);
+  const [editingId, setEditingId] = useState(null);
+
+  function startAdd() { setForm(EMPTY_EVENT_FORM); setEditingId(null); }
+  function startEdit(item) {
+    setEditingId(item._id);
+    setForm({
+      order: item.order || 0, dateLabel: item.dateLabel || '',
+      translations: EVENT_LANGS.reduce((acc, l) => {
+        const t = (item.translations && item.translations[l]) || {};
+        acc[l] = { title: t.title || '', description: t.description || '' };
+        return acc;
+      }, {}),
+    });
+    window.scrollTo({ top: document.querySelector('.admin-form')?.offsetTop - 90 || 0, behavior: 'smooth' });
+  }
+  const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const setLangField = (lang, k) => (e) => setForm((f) => ({ ...f, translations: { ...f.translations, [lang]: { ...f.translations[lang], [k]: e.target.value } } }));
+
+  async function save(e) {
+    e.preventDefault();
+    const body = { ...form, order: Number(form.order) || 0 };
+    const r = editingId
+      ? await authFetch(`/admin/events/${editingId}`, { method: 'PUT', body: JSON.stringify(body) })
+      : await authFetch('/admin/events', { method: 'POST', body: JSON.stringify(body) });
+    const b = await r.json();
+    if (r.ok) { setStatus(editingId ? 'Event updated.' : 'Event added.'); startAdd(); reload(); }
+    else setStatus(b.error || 'Save failed.');
+  }
+  async function remove(id) {
+    if (!window.confirm('Delete this event?')) return;
+    const r = await authFetch(`/admin/events/${id}`, { method: 'DELETE' });
+    if (r.ok) { if (editingId === id) startAdd(); reload(); } else setStatus('Delete failed.');
+  }
+
+  return (
+    <section>
+      <div className="admin-head"><h2>Events</h2><button className="btn btn-outline sm" onClick={reload}>Refresh</button></div>
+      <p className="muted">
+        Shown on the public Events page (reached via the hero "Event" button on the home page). Leave this list empty and the
+        page shows a friendly "no events yet" message instead of a blank page.
+      </p>
+      {!rows ? <p className="muted">Loading…</p> : rows.length === 0 ? <p className="muted">No events yet — add one below.</p> : (
+        <div className="table-wrap"><table>
+          <thead><tr><th>Order</th><th>Date</th><th>Title (sv)</th><th></th></tr></thead>
+          <tbody>{rows.map((r) => (
+            <tr key={r._id}>
+              <td>{r.order}</td><td>{r.dateLabel}</td>
+              <td>{(r.translations && r.translations.sv && r.translations.sv.title) || ''}</td>
+              <td style={{ whiteSpace: 'nowrap' }}>
+                <button className="btn btn-outline sm" onClick={() => startEdit(r)}>Edit</button>{' '}
+                <button className="btn btn-outline sm" onClick={() => remove(r._id)}>Delete</button>
+              </td>
+            </tr>
+          ))}</tbody>
+        </table></div>
+      )}
+
+      <form className="admin-form" onSubmit={save}>
+        <h3>{editingId ? 'Edit event' : 'Add an event'}</h3>
+        <div className="grid4">
+          <input type="number" placeholder="Order" value={form.order} onChange={setField('order')} />
+          <input placeholder='Date (free text, e.g. "Fredag 25 okt" or "Every Friday")' value={form.dateLabel} onChange={setField('dateLabel')} />
+        </div>
+
+        {EVENT_LANGS.map((l) => (
+          <div key={l} className="row" style={{ alignItems: 'flex-start' }}>
+            <label style={{ flex: 1 }}>{`Title (${l})`}
+              <input value={form.translations[l].title} onChange={setLangField(l, 'title')} />
+            </label>
+            <label style={{ flex: 2 }}>{`Description (${l})`}
+              <textarea rows="2" value={form.translations[l].description} onChange={setLangField(l, 'description')} />
+            </label>
+          </div>
+        ))}
+
+        <div className="row">
+          <button className="btn btn-gold" type="submit">{editingId ? 'Save changes' : 'Add event'}</button>
           {editingId && <button className="btn btn-outline" type="button" onClick={startAdd}>Cancel edit</button>}
         </div>
       </form>

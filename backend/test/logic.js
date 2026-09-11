@@ -32,7 +32,7 @@ ok('languages: sv, en, pt (one default)');
 
 // ── Pages / nav ──
 const slugs = data.pages.map((p) => p.slug);
-['home', 'bakfickan', 'konferens', 'festvaning', 'mat-meny', 'drink-meny', 'om-oss', 'kontakt']
+['home', 'bakfickan', 'konferens', 'festvaning', 'mat-meny', 'drink-meny', 'om-oss', 'kontakt', 'events']
   .forEach((s) => assert.ok(slugs.includes(s), `missing page ${s}`));
 assert.ok(data.pages.every((p) => p.navKey && p.path), 'each page has navKey + path');
 ok(`${data.pages.length} pages incl. all nav items (${slugs.join(', ')})`);
@@ -67,6 +67,22 @@ assert.strictEqual(pricing.translations.sv.tiers[0].name, 'Grillbuffé inkl. veg
 assert.strictEqual(pricing.translations.en.tiers[3].price, 'Free');
 assert.strictEqual(pricing.translations.pt.tiers[3].price, 'Grátis');
 ok('pricing block: base price + localized names (449 kr / Free / Grátis)');
+
+// Experiences block ("One place. Many experiences.") — 5 offering cards, translated
+const experiences = home.blocks.find((b) => b.type === 'experiences');
+assert.ok(experiences, 'home should have an experiences block');
+LANGS.forEach((lc) => {
+  const items = experiences.translations[lc].items;
+  assert.strictEqual(items.length, 5, `experiences.${lc}.items should have 5 cards`);
+  items.forEach((it) => assert.ok(it.title && it.body, `experiences.${lc} item missing title/body`));
+});
+ok('experiences block: 5 offering cards translated in all languages');
+
+// Events: page + (empty, honest) data array + admin-manageable via /admin/events
+assert.ok(Array.isArray(data.events), 'events should be an array');
+const eventsPage = data.pages.find((p) => p.slug === 'events');
+assert.ok(eventsPage && !eventsPage.inNav && eventsPage.path === '/events', 'events page should exist, off-nav, at /events');
+ok(`events: page present (off-nav) + ${data.events.length} seeded events (real ones added via admin)`);
 
 // Videos present (hero + festvaning)
 const allVideos = [];
@@ -123,9 +139,10 @@ ok('settings: phone, socials (TikTok/IG/FB), hero video');
 // Modules load
 ['../src/models/Language', '../src/models/Setting', '../src/models/Location',
   '../src/models/Page', '../src/models/UiString', '../src/models/Inquiry', '../src/models/Subscriber',
-  '../src/models/MenuItem',
+  '../src/models/MenuItem', '../src/models/Event',
   '../src/controllers/siteController', '../src/controllers/adminController',
-  '../src/controllers/formController', '../src/controllers/menuController', '../src/routes'].forEach((m) => require(m));
+  '../src/controllers/formController', '../src/controllers/menuController', '../src/controllers/eventController',
+  '../src/routes'].forEach((m) => require(m));
 require('../src/server');
 ok('all models, controllers, routes and server load cleanly');
 

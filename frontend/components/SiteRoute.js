@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getSite, getPage, getMenu, STATIC } from '@/lib/api';
-import { buildSite, buildPage, buildMenu } from '@/lib/site';
+import { getSite, getPage, getMenu, getEvents, STATIC } from '@/lib/api';
+import { buildSite, buildPage, buildMenu, buildEvents } from '@/lib/site';
 import { useLang } from '@/context/LangProvider';
 import { useBooking } from '@/context/BookingProvider';
 import { useMenuChoice } from '@/context/MenuChoiceProvider';
@@ -11,6 +11,7 @@ import PageView from './PageView';
 // Pages that show the real, structured menu (dishes/drinks/wines) instead of
 // (or alongside) their content blocks.
 const MENU_PAGES = ['mat-meny', 'drink-meny'];
+const EVENTS_PAGE = 'events';
 
 /**
  * Client-rendered page. Reads the active language from context and loads the
@@ -20,11 +21,13 @@ const MENU_PAGES = ['mat-meny', 'drink-meny'];
 export default function SiteRoute({ slug }) {
   const { lang } = useLang();
   const isMenuPage = MENU_PAGES.includes(slug);
+  const isEventsPage = slug === EVENTS_PAGE;
   // In static mode build synchronously so the first paint already has content.
   const [data, setData] = useState(() => {
     if (!STATIC) return null;
     const m = isMenuPage ? buildMenu(slug, lang) : null;
-    return { site: buildSite(lang), page: buildPage(slug, lang), menu: m };
+    const ev = isEventsPage ? buildEvents(lang) : null;
+    return { site: buildSite(lang), page: buildPage(slug, lang), menu: m, events: ev };
   });
   const [loading, setLoading] = useState(!STATIC);
   const { setSite } = useBooking();
@@ -41,12 +44,13 @@ export default function SiteRoute({ slug }) {
     let alive = true;
     (async () => {
       if (!STATIC) setLoading(true);
-      const [site, page, menu] = await Promise.all([
+      const [site, page, menu, events] = await Promise.all([
         getSite(lang),
         getPage(slug, lang),
         isMenuPage ? getMenu(slug, lang) : Promise.resolve(null),
+        isEventsPage ? getEvents(lang) : Promise.resolve(null),
       ]);
-      if (alive) { setData({ site, page, menu }); setLoading(false); }
+      if (alive) { setData({ site, page, menu, events }); setLoading(false); }
     })();
     return () => { alive = false; };
   }, [slug, lang]);
@@ -60,5 +64,5 @@ export default function SiteRoute({ slug }) {
     );
   }
 
-  return <PageView site={data.site} page={data.page} menu={data.menu} />;
+  return <PageView site={data.site} page={data.page} menu={data.menu} events={data.events} />;
 }

@@ -1,7 +1,7 @@
 // Build the same payloads the Express API returns, but from embedded content —
 // so the site works with NO backend (static GitHub Pages deploy).
 import { pick, resolveDoc, mapToObject } from './resolve';
-import { languages as LANGS, setting, locations as LOCS, pages as PAGES, menuItems as MENU_ITEMS, ui as UI } from './content';
+import { languages as LANGS, setting, locations as LOCS, pages as PAGES, menuItems as MENU_ITEMS, events as EVENTS, ui as UI } from './content';
 
 const enabled = LANGS.filter((l) => l.enabled !== false).sort((a, b) => a.sortOrder - b.sortOrder);
 const defaultLang = (enabled.find((l) => l.isDefault) || {}).code || 'sv';
@@ -96,4 +96,19 @@ export function buildMenu(page, lang) {
   });
   groups.sort((g1, g2) => g1.groupOrder - g2.groupOrder);
   return groups;
+}
+
+/**
+ * All events for the Events page, localized and ordered — mirrors the
+ * Express `getEvents` controller exactly, resolved purely from embedded
+ * content so it works with zero backend.
+ */
+export function buildEvents(lang) {
+  const a = activeCode(lang);
+  return EVENTS.slice()
+    .sort((x, y) => (x.order || 0) - (y.order || 0))
+    .map((e, i) => {
+      const loc = pick(e.translations, a, defaultLang) || {};
+      return { id: i, order: e.order || 0, dateLabel: e.dateLabel || '', title: loc.title || '', description: loc.description || '' };
+    });
 }

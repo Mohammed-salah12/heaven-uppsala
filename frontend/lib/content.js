@@ -170,6 +170,33 @@ const pages = [
             { name: 'Buffet para crianças 7–10 anos', unit: '' },
             { name: 'Crianças até 6 anos', price: 'Grátis', unit: 'comem de graça!' } ] },
         }),
+      // "One place. Many experiences." — five offerings under one roof.
+      // Restaurant reuses the real "Om oss" copy below; the other four are
+      // clearly-flagged honest placeholder taglines until real copy is supplied.
+      B('experiences', { order: 1.5 },
+        {
+          sv: { heading: 'En plats. Många upplevelser.', subheading: 'Från churrasco till cocktails — fem sätt att uppleva Heaven.', items: [
+            { title: 'Restaurang', body: 'Vår churrascosal – brasiliansk grilltradition i en atmosfär av glädje och gemenskap.' },
+            { title: 'Lounge & Cocktailbar', body: 'Koppla av med välgjorda cocktails i en stilfull loungemiljö.' },
+            { title: 'Vincafé', body: 'En avslappnad plats för ett glas från vinlistan och något lätt att äta.' },
+            { title: 'Nightclub', body: 'Bra musik och härlig stämning när kvällen drar igång.' },
+            { title: 'Atelier', body: 'En mångsidig lokal för privata sammankomster och event.' },
+          ] },
+          en: { heading: 'One place. Many experiences.', subheading: 'From churrasco to cocktails — five ways to experience Heaven.', items: [
+            { title: 'Restaurant', body: 'Our churrasco dining room — Brazilian grill tradition in an atmosphere of joy and togetherness.' },
+            { title: 'Lounge & Cocktail Bar', body: 'Relax with expertly crafted cocktails in a stylish lounge setting.' },
+            { title: 'Wine Cafe', body: 'A relaxed spot for a glass from our wine list and something light to eat.' },
+            { title: 'Nightclub', body: 'Great music and a lively atmosphere when the night gets going.' },
+            { title: 'Atelier', body: 'A versatile space for private gatherings and events.' },
+          ] },
+          pt: { heading: 'Um só lugar. Muitas experiências.', subheading: 'Do churrasco aos coquetéis — cinco formas de viver o Heaven.', items: [
+            { title: 'Restaurante', body: 'Nossa sala de churrasco — tradição da grelha brasileira em uma atmosfera de alegria e convívio.' },
+            { title: 'Lounge & Bar de Coquetéis', body: 'Relaxe com coquetéis bem preparados em um ambiente de lounge estiloso.' },
+            { title: 'Wine Cafe', body: 'Um espaço tranquilo para uma taça da nossa carta de vinhos e algo leve para comer.' },
+            { title: 'Nightclub', body: 'Boa música e clima animado quando a noite começa.' },
+            { title: 'Atelier', body: 'Um espaço versátil para encontros privados e eventos.' },
+          ] },
+        }),
       B('split', { order: 2, anchor: 'ourstory', image: media.grill },
         {
           sv: { eyebrow: 'Om oss', heading: 'Restaurang Heaven – Grill', body: 'Churrasco­upplevelse mitt i Uppsala där vi kombinerar brasiliansk grilltradition med en atmosfär av glädje och gemenskap.' },
@@ -415,6 +442,22 @@ const pages = [
   // ── Nav-only anchors on the home page ──
   { slug: 'om-oss', order: 7, inNav: true, navKey: 'nav.omoss', path: '/#ourstory', isAnchor: true, translations: {}, blocks: [] },
   { slug: 'kontakt', order: 8, inNav: true, navKey: 'nav.kontakt', path: '/#kontakt', isAnchor: true, translations: {}, blocks: [] },
+
+  // ═══════════════════════ EVENTS ═══════════════════════
+  // Reached via the "Event" hero button (home page only), not the main nav
+  // for now. The actual event listing comes from `events` below (via
+  // getEvents/buildEvents) — kept honestly empty until real events are added
+  // from the admin dashboard, rather than filling it with invented dates.
+  {
+    slug: 'events', order: 9, inNav: false, navKey: 'nav.events', path: '/events', isAnchor: false,
+    heroImageUrl: media.heroPoster, heroVideoUrl: media.heroVideo,
+    translations: {
+      sv: { title: 'Event', subtitle: 'Vad som händer hos oss' },
+      en: { title: 'Events', subtitle: "What's on at Heaven" },
+      pt: { title: 'Eventos', subtitle: 'O que está rolando no Heaven' },
+    },
+    blocks: [],
+  },
 ];
 
 // helper to keep menu-item definitions compact
@@ -576,6 +619,13 @@ const menuItems = [
   MI('drink-meny', 'wineBottleSparkling', 11, 3, '2000 kr', { sv: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, Frankrike', description: '' }, en: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, France', description: '' }, pt: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, França', description: '' } }),
 ];
 
+// ── Events (shown on the new Events page) ──
+// Intentionally empty — no real event dates/names exist yet, and inventing
+// some would mislead real customers on a live site. Add real events from the
+// admin dashboard's Events tab; the page shows an honest "no events yet"
+// message until then.
+const events = [];
+
 // ── UI strings (nav, buttons, forms, labels) ──
 const ui = {
   'nav.home': { sv: 'Hem', en: 'Home', pt: 'Início' },
@@ -586,11 +636,15 @@ const ui = {
   'nav.drinkmeny': { sv: 'Drink meny', en: 'Drinks menu', pt: 'Bebidas' },
   'nav.omoss': { sv: 'Om oss', en: 'About', pt: 'Sobre' },
   'nav.kontakt': { sv: 'Kontakt', en: 'Contact', pt: 'Contato' },
+  'nav.events': { sv: 'Event', en: 'Events', pt: 'Eventos' },
   'cta.book': { sv: 'Boka bord', en: 'Book a table', pt: 'Reservar mesa' },
   'cta.foodMenu': { sv: 'Mat meny', en: 'Food menu', pt: 'Cardápio' },
   'cta.drinkMenu': { sv: 'Drink meny', en: 'Drinks menu', pt: 'Bebidas' },
   'cta.dropin': { sv: 'Drop in-meny', en: 'Drop-in menu', pt: 'Cardápio drop-in' },
   'cta.explore': { sv: 'Utforska menyn', en: 'Explore the menu', pt: 'Explorar o cardápio' },
+  'cta.events': { sv: 'Event', en: 'Events', pt: 'Eventos' },
+  // Events page — honest empty state until real events are added.
+  'events.empty': { sv: 'Inga event inbokade just nu — kika in igen snart!', en: 'No events scheduled right now — check back soon!', pt: 'Nenhum evento agendado no momento — volte em breve!' },
   // "Boka bord" choice modal — asks the guest which dining experience to book.
   'booking.choose.title': { sv: 'Hur vill du äta?', en: 'How would you like to dine?', pt: 'Como você gostaria de jantar?' },
   'booking.choose.subtitle': { sv: 'Välj ett upplägg för att gå vidare till bokning.', en: 'Choose an experience to continue to booking.', pt: 'Escolha uma experiência para continuar com a reserva.' },
@@ -648,4 +702,4 @@ const ui = {
   'form.error': { sv: 'Något gick fel. Försök igen.', en: 'Something went wrong. Please try again.', pt: 'Algo deu errado. Tente novamente.' },
 };
 
-export { languages, setting, locations, pages, menuItems, ui };
+export { languages, setting, locations, pages, menuItems, events, ui };

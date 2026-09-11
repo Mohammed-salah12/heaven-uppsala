@@ -12,6 +12,7 @@ const Location = require('../models/Location');
 const Page = require('../models/Page');
 const UiString = require('../models/UiString');
 const MenuItem = require('../models/MenuItem');
+const Event = require('../models/Event');
 
 const data = require('./data');
 
@@ -26,6 +27,7 @@ async function run() {
     Page.deleteMany({}),
     UiString.deleteMany({}),
     MenuItem.deleteMany({}),
+    Event.deleteMany({}),
   ]);
 
   await Language.insertMany(data.languages);
@@ -33,6 +35,7 @@ async function run() {
   await Location.insertMany(data.locations);
   await Page.insertMany(data.pages);
   await MenuItem.insertMany(data.menuItems);
+  if (data.events && data.events.length) await Event.insertMany(data.events);
 
   const uiDocs = Object.entries(data.ui).map(([key, translations]) => ({ key, translations }));
   await UiString.insertMany(uiDocs);
@@ -43,6 +46,7 @@ async function run() {
    • ${data.pages.length} pages (${data.pages.map((p) => p.slug).join(', ')})
    • ${totalBlocks} content blocks
    • ${data.menuItems.length} menu items (mat-meny + drink-meny)
+   • ${data.events.length} events (add real ones from the admin dashboard)
    • ${data.locations.length} locations
    • ${uiDocs.length} UI strings`);
 

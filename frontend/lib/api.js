@@ -1,4 +1,4 @@
-import { buildSite, buildPage, buildMenu } from './site';
+import { buildSite, buildPage, buildMenu, buildEvents } from './site';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 // STATIC mode = no backend; content is embedded and resolved in the browser.
@@ -32,6 +32,12 @@ export function getPage(slug, lang) {
 export function getMenu(page, lang) {
   if (STATIC) return Promise.resolve(buildMenu(page, lang));
   return getJSON(`/menu/${encodeURIComponent(page)}${lang ? `?lang=${encodeURIComponent(lang)}` : ''}`);
+}
+
+/** All events for the Events page. */
+export function getEvents(lang) {
+  if (STATIC) return Promise.resolve(buildEvents(lang));
+  return getJSON(`/events${lang ? `?lang=${encodeURIComponent(lang)}` : ''}`);
 }
 
 export { API_URL, STATIC };

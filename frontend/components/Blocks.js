@@ -109,6 +109,27 @@ export default function Blocks({ blocks = [], site }) {
               </section>
             );
 
+          case 'experiences':
+            return (
+              <section className={cls} id={id} key={i}>
+                <div className="container">
+                  <div className="experiences-head">
+                    {block.eyebrow && <p className="eyebrow center">{block.eyebrow}</p>}
+                    <h2 className="display">{block.heading}</h2>
+                    {block.subheading && <p className="lead" style={{ margin: '0 auto' }}>{block.subheading}</p>}
+                  </div>
+                  <div className="experiences-grid">
+                    {(block.items || []).map((it, j) => (
+                      <div className="experience-card" key={j}>
+                        <h3>{it.title}</h3>
+                        {it.body && <p>{it.body}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+
           case 'gallery':
             return (
               <section className={cls} id={id} key={i}>

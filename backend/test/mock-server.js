@@ -139,5 +139,34 @@ app.delete('/api/admin/menu-items/:id', admin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Events (in-memory, mirrors eventController) ──
+let events = data.events.map((e, i) => ({ ...e, _id: `ev${i}` }));
+app.get('/api/events', (req, res) => {
+  const a = active((req.query.lang || defaultLang).toLowerCase());
+  const resolved = events.slice().sort((x, y) => (x.order || 0) - (y.order || 0)).map((e) => {
+    const loc = pick(e.translations, a, defaultLang) || {};
+    return { id: e._id, order: e.order || 0, dateLabel: e.dateLabel || '', title: loc.title || '', description: loc.description || '' };
+  });
+  res.json(resolved);
+});
+app.get('/api/admin/events', admin, (req, res) => res.json(events));
+app.post('/api/admin/events', admin, (req, res) => {
+  const event = { _id: `ev${events.length}-${Date.now()}`, order: 0, dateLabel: '', translations: {}, ...req.body };
+  events.push(event);
+  res.status(201).json(event);
+});
+app.put('/api/admin/events/:id', admin, (req, res) => {
+  const event = events.find((e) => e._id === req.params.id);
+  if (!event) return res.status(404).json({ error: 'Event not found' });
+  Object.assign(event, req.body);
+  res.json(event);
+});
+app.delete('/api/admin/events/:id', admin, (req, res) => {
+  const before = events.length;
+  events = events.filter((e) => e._id !== req.params.id);
+  if (events.length === before) return res.status(404).json({ error: 'Event not found' });
+  res.json({ ok: true });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`mock API on ${PORT}`));

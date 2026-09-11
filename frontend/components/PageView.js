@@ -5,7 +5,9 @@ import Footer from './Footer';
 import DirManager from './DirManager';
 import BookButton from './BookButton';
 import ExploreMenuButton from './ExploreMenuButton';
+import EventsButton from './EventsButton';
 import MenuGroups from './MenuGroups';
+import EventsList from './EventsList';
 import { API_URL } from '@/lib/api';
 
 function Fallback() {
@@ -25,7 +27,7 @@ npm install && npm run seed && npm run dev`}</pre>
   );
 }
 
-export default function PageView({ site, page, menu }) {
+export default function PageView({ site, page, menu, events }) {
   if (!site || !page) return <Fallback />;
   const { ui, settings, lang, dir } = site;
   const t = (k) => ui[k] || k;
@@ -35,6 +37,7 @@ export default function PageView({ site, page, menu }) {
     <div className="hero-cta">
       <BookButton>{t('cta.book')}</BookButton>
       {isHome && <ExploreMenuButton>{t('cta.explore')}</ExploreMenuButton>}
+      {isHome && <EventsButton>{t('cta.events')}</EventsButton>}
     </div>
   );
 
@@ -51,6 +54,7 @@ export default function PageView({ site, page, menu }) {
         cta={heroCta}
       />
       <MenuGroups groups={menu} />
+      <EventsList events={events} ui={ui} />
       <Blocks blocks={page.blocks} site={site} />
       <Footer site={site} />
     </>
