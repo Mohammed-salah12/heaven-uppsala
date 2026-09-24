@@ -1,0 +1,16 @@
+{
+  "name": "heaven-uppsala-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "NEXT_PUBLIC_STATIC=true next dev",
+    "build": "NEXT_PUBLIC_STATIC=true next build",
+    "start": "NEXT_PUBLIC_STATIC=true next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

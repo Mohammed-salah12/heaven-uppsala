@@ -1,0 +1,12 @@
+{
+  "name": "heaven-uppsala",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Heaven Uppsala — multilingual, client-only restaurant site (Next.js). Content is embedded; table booking calls easyTable directly from the browser.",
+  "scripts": {
+    "install:all": "npm --prefix frontend install",
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "localize-images": "node scripts/download-images.mjs"
+  }
+}
