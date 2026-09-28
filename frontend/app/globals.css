@@ -613,38 +613,67 @@ section { position: relative; }
 }
 
 /* ============================================================
-   EVENTS — the Events page listing, fetched via getEvents(). Mirrors the
-   MENU ITEMS styling above; shows an honest empty state until real events
-   are added from the admin dashboard.
+   EVENTS — the Events page listing AND the home page "What's On" teaser,
+   both built from buildEvents()/getEvents() via <EventCard>. Shows an
+   honest empty/nothing-at-all state until real events are added to
+   lib/content.js's `events` array (no admin dashboard on this client-only
+   site — see the comment above that array).
    ============================================================ */
 .events-section { padding-top: 90px; }
 .events-empty { text-align: center; color: var(--muted); font-size: 1.1rem; max-width: 560px; margin: 0 auto; }
-.event-list { list-style: none; padding: 0; max-width: 860px; margin: 0 auto; }
-.event-item {
-  display: flex;
-  gap: 24px;
-  padding: 22px 0;
-  border-bottom: 1px solid var(--line-soft);
-  min-width: 0;
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+  max-width: 1120px;
+  margin: 0 auto;
 }
-.event-item:last-child { border-bottom: none; }
-.event-date {
-  flex-shrink: 0;
-  width: 130px;
+
+.event-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.event-card:hover { transform: translateY(-6px); border-color: var(--line); }
+.event-card-media { aspect-ratio: 16 / 10; overflow: hidden; }
+.event-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.event-card-body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 8px; }
+.event-card-body .tag { align-self: flex-start; margin-bottom: 2px; }
+.event-card-title { font-family: var(--serif); font-size: 1.4rem; color: var(--cream); margin: 0; }
+.event-card-date {
   color: var(--gold);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding-top: 4px;
+  margin: 0;
 }
-.event-body { min-width: 0; }
-.event-title { font-family: var(--serif); font-size: 1.3rem; color: var(--cream); margin: 0; }
-.event-desc { color: var(--muted); font-size: 0.96rem; line-height: 1.6; margin: 8px 0 0; }
+.event-card-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.6; margin: 4px 0 0; }
+.event-card-price { color: var(--gold-soft); font-family: var(--serif); font-size: 1.15rem; margin: 4px 0 0; }
+.event-card-cta { align-self: flex-start; margin-top: 10px; }
+.event-card-form { gap: 14px; margin-top: 6px; }
+.event-card-form .btn { align-self: stretch; text-align: center; }
+.event-card-total { color: var(--text); font-size: 0.95rem; margin: 0; }
+.event-card-total strong { color: var(--gold-soft); }
+.event-card-success { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; margin-top: 6px; }
+.event-card-success p { margin: 0; color: var(--muted); }
+.events-fallback { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.events-fallback p { color: var(--muted); font-size: 0.92rem; margin: 0; }
+.event-card-demo-badge { margin-left: 8px; border-style: dashed; color: var(--muted-2); }
+.event-card-demo-note { color: var(--muted-2); font-style: italic; }
+
+.events-home-section { padding-top: 64px; }
+.events-home-seeall { text-align: center; margin-top: 40px; }
+
 @media (max-width: 620px) {
   .events-section { padding-top: 64px; }
-  .event-item { flex-direction: column; gap: 6px; }
-  .event-date { width: auto; padding-top: 0; }
+  .events-home-section { padding-top: 48px; }
+  .events-grid { grid-template-columns: 1fr; }
 }
 
 /* ============================================================

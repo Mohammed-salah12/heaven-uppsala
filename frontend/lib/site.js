@@ -99,16 +99,58 @@ export function buildMenu(page, lang) {
 }
 
 /**
- * All events for the Events page, localized and ordered — mirrors the
- * Express `getEvents` controller exactly, resolved purely from embedded
- * content so it works with zero backend.
+ * All events, localized and expanded into individual bookable cards —
+ * resolved purely from embedded content so it works with zero backend.
+ *
+ * Each entry in `events` (lib/content.js) is either:
+ *   - kind: 'ticketed' — one or more concrete `dates`; EVERY date becomes
+ *     its own separate card with its own buy button, so a one-time event
+ *     "copied" onto several dates is just one entry with several dates.
+ *   - kind: 'course' — a continuous/recurring series (e.g. a dance course)
+ *     sold as a single package; only ONE card is produced, using the
+ *     first date as the booking's date/time and `scheduleLabel` as the
+ *     human-readable recurrence description ("Mondays, 6 weeks, from 5 Oct").
+ *
+ * Cards are returned sorted chronologically. Filtering out past dates is
+ * intentionally NOT done here — it's date/time-of-day dependent, and this
+ * function also runs once during the static export build, so filtering at
+ * build time would bake in that build's "today" and could mismatch the
+ * visitor's real "today" (a React hydration mismatch). Components filter
+ * client-side, after mount, instead — see EventsList / UpcomingEvents.
  */
 export function buildEvents(lang) {
   const a = activeCode(lang);
-  return EVENTS.slice()
-    .sort((x, y) => (x.order || 0) - (y.order || 0))
-    .map((e, i) => {
-      const loc = pick(e.translations, a, defaultLang) || {};
-      return { id: i, order: e.order || 0, dateLabel: e.dateLabel || '', title: loc.title || '', description: loc.description || '' };
-    });
+  const cards = [];
+
+  EVENTS.forEach((e, ei) => {
+    const loc = pick(e.translations, a, defaultLang) || {};
+    const scheduleLabel = e.scheduleLabel ? pick(e.scheduleLabel, a, defaultLang) : '';
+    const kind = e.kind === 'course' ? 'course' : 'ticketed';
+    const base = {
+      kind,
+      title: loc.title || '',
+      description: loc.description || '',
+      image: e.image || '',
+      price: e.price || 0,
+      currency: e.currency || 'SEK',
+      easytable: e.easytable || null,
+      demo: Boolean(e.demo),
+    };
+    const dates = Array.isArray(e.dates) ? e.dates : [];
+
+    if (kind === 'course') {
+      const first = dates[0] || {};
+      cards.push({ id: `${ei}-course`, order: e.order || 0, ...base, date: first.date || '', time: first.time || '', scheduleLabel });
+    } else {
+      dates.forEach((d, di) => {
+        cards.push({ id: `${ei}-${di}`, order: e.order || 0, ...base, date: d.date || '', time: d.time || '' });
+      });
+    }
+  });
+
+  return cards.sort((x, y) => {
+    const byOrder = (x.order || 0) - (y.order || 0);
+    if (byOrder !== 0) return byOrder;
+    return `${x.date}${x.time || ''}`.localeCompare(`${y.date}${y.time || ''}`);
+  });
 }

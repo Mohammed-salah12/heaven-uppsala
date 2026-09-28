@@ -20,19 +20,43 @@
 const EASYTABLE_BASE_URL = 'https://api.easytable.com';
 const LANG_MAP = { sv: 'SE', en: 'EN' };
 
+// Some locations share the same easyTable "place" as another (à la carte at
+// Bakfickan uses the Bakfickan token, not its own). Events get the same
+// generic override mechanism via NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_EVENTS —
+// see isEventTicketingConfigured() below.
+const LOCATION_ALIASES = { alacarte: 'bakfickan' };
+
 function placeTokenFor(location) {
-  if (location === 'alacarte' || location === 'bakfickan') {
-    return (
-      process.env.NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_BAKFICKAN ||
-      process.env.NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN ||
-      ''
-    );
+  const raw = String(location || '').toLowerCase();
+  const suffix = (LOCATION_ALIASES[raw] || raw).toUpperCase();
+  if (suffix) {
+    const specific = process.env[`NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_${suffix}`];
+    if (specific) return specific;
   }
   return process.env.NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN || '';
 }
 
 export function isBookingConfigured(location) {
   return Boolean(process.env.NEXT_PUBLIC_EASYTABLE_API_KEY) && Boolean(placeTokenFor(location));
+}
+
+// An event/course is bookable once BOTH pieces of easyTable setup exist:
+// a place token for wherever it lives (reuses an existing location, or a
+// dedicated NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_EVENTS), and — per event, in
+// lib/content.js's `events` entries — a `typeId` (the booking type/room in
+// easyTable's back-office reserved for this event) and a `productId` (the
+// preorder product representing its ticket/course price). Until an event
+// has both, its card shows an honest "contact us" fallback instead of a
+// buy button that would just fail.
+export function isEventTicketingConfigured(event) {
+  const et = event && event.easytable;
+  if (!et) return false;
+  return (
+    Boolean(process.env.NEXT_PUBLIC_EASYTABLE_API_KEY) &&
+    Boolean(placeTokenFor(et.location)) &&
+    Boolean(et.typeId) &&
+    Boolean(et.productId)
+  );
 }
 
 // "2026-09-24" -> "2026/09/24" (easyTable's date format)
@@ -113,14 +137,14 @@ async function easyTableFetch(path, { method = 'GET', location, query, body } = 
   return data || {};
 }
 
-export async function getAvailability({ date, guests, location }) {
+export async function getAvailability({ date, guests, location, typeId }) {
   const easyDate = toEasyTableDate(date);
   if (!easyDate) return { error: 'Please pick a valid date.' };
   if (!isBookingConfigured(location)) return { error: 'not_configured' };
 
   const raw = await easyTableFetch('/v2/availability', {
     location,
-    query: { date: easyDate, persons: guests, distinct: 1 },
+    query: { date: easyDate, persons: guests, distinct: 1, ...(typeId ? { typeId } : {}) },
   });
   if (raw.error) return raw;
 
@@ -172,6 +196,65 @@ export async function createReservation({ date, time, guests, name, phone, email
     bookingId: field(raw, 'bookingId', 'BookingId') ?? null,
     date: field(raw, 'date', 'Date') || date,
     arrival: field(raw, 'arrival', 'Arrival') || time,
+    paymentUrl: field(raw, 'paymentUrl', 'PaymentUrl') || null,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Events / tickets / courses
+//
+// Buying a ticket (or enrolling in a course) is, underneath, ONE easyTable
+// booking with a mandatory prepaid "preorder" product attached — the same
+// /v2/bookings endpoint createReservation() already uses, just with the
+// extra preorder fields included in the same request (easyTable's docs
+// confirm POST /v2/bookings accepts PreorderSetupID/ForcePreorderPayment/
+// ProductID/Qty/Price directly, no second call needed). easyTable returns
+// a paymentUrl the guest must pay to keep the booking; if they don't pay
+// in time, easyTable auto-cancels it and the seats free up on their own —
+// no inventory bookkeeping needed on this site's side.
+//
+// ⚠️ Unlike createReservation() above (real-API-verified this project),
+// the extra fields here (typeId / forcePreorderPayment / productId / qty)
+// are based on easyTable's published API docs but have NOT yet been
+// exercised against a real booking. Test a real event purchase — same way
+// the table-booking flow was verified — as soon as a real typeId/productId
+// exist, and watch for a field-name/casing mismatch the way availableTimes
+// and the date format each turned out to be wrong on first try.
+// ─────────────────────────────────────────────────────────────────────────
+
+export async function createEventBooking({ event, date, time, qty, name, phone, email, message, lang }) {
+  const isIsoDate = /^\d{4}-\d{2}-\d{2}$/.test(String(date || ''));
+  const quantity = Number(qty);
+  if (!isIsoDate || !time || !quantity || quantity < 1 || !name || (!phone && !email)) {
+    return { error: 'Please fill in every required field.' };
+  }
+  if (!isEventTicketingConfigured(event)) return { error: 'not_configured' };
+
+  const et = event.easytable;
+  const body = {
+    date,
+    time,
+    persons: quantity,
+    name,
+    email: email || undefined,
+    mobile: toMobile(phone),
+    guestNote: message || undefined,
+    comment: `Event booking via website — ${event.title || ''}`.trim(),
+    language: LANG_MAP[lang] || undefined,
+    onlineBooking: 1,
+    typeId: et.typeId,
+    forcePreorderPayment: 1,
+    productId: et.productId,
+    qty: quantity,
+    ...(event.price ? { price: Math.round(event.price * quantity) } : {}),
+  };
+
+  const raw = await easyTableFetch('/v2/bookings', { method: 'POST', location: et.location, body });
+  if (raw.error) return raw;
+
+  return {
+    ok: true,
+    bookingId: field(raw, 'bookingId', 'BookingId') ?? null,
     paymentUrl: field(raw, 'paymentUrl', 'PaymentUrl') || null,
   };
 }

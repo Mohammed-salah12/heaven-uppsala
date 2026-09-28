@@ -2,17 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getAvailability, createReservation, isBookingConfigured } from '@/lib/easytable';
+import { isoDate, localeFor } from '@/lib/dates';
 
-const LOCALE_MAP = { sv: 'sv-SE', en: 'en-GB', pt: 'pt-PT' };
 const DAYS_AHEAD = 8; // "today" + a week of quick-pick date chips
 const SEARCH_DEBOUNCE_MS = 300; // absorbs rapid guest +/- clicks without spamming requests
 
-function isoDate(d) {
-  return d.toISOString().slice(0, 10);
-}
-
 function buildDateOptions(lang, todayLabel, tomorrowLabel) {
-  const locale = LOCALE_MAP[lang] || 'en-GB';
+  const locale = localeFor(lang);
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   const out = [];

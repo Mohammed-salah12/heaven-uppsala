@@ -8,6 +8,7 @@ import ExploreMenuButton from './ExploreMenuButton';
 import EventsButton from './EventsButton';
 import MenuGroups from './MenuGroups';
 import EventsList from './EventsList';
+import UpcomingEvents from './UpcomingEvents';
 
 function Fallback() {
   return (
@@ -52,7 +53,8 @@ export default function PageView({ site, page, menu, events }) {
         cta={heroCta}
       />
       <MenuGroups groups={menu} />
-      <EventsList events={events} ui={ui} />
+      {isHome && <UpcomingEvents events={events} ui={ui} lang={lang} settings={settings} />}
+      {page.slug === 'events' && <EventsList events={events} ui={ui} lang={lang} settings={settings} />}
       <Blocks blocks={page.blocks} site={site} />
       <Footer site={site} />
     </>

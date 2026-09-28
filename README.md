@@ -97,6 +97,22 @@ Until both env vars are set, the booking form shows a friendly "please call us" 
 
 ---
 
+## 🎟 Events & tickets — also via easyTable, no separate payment provider
+
+The home page's "What's On" section and the `/events` page both list bookable events: one-time events (optionally repeated across several dates, each its own card), and continuous courses (e.g. a dance course) sold as one package. Buying a ticket or enrolling in a course reuses the exact same easyTable connection as table booking — `createEventBooking()` in `frontend/lib/easytable.js` creates a booking with a mandatory prepaid "preorder" product attached in the same request, and easyTable returns a payment link the guest completes to keep their spot. An unpaid booking is auto-cancelled by easyTable, so seats free themselves up with no extra bookkeeping.
+
+**To add an event:** add an entry to the `events` array in `frontend/lib/content.js` — there's a fully commented, copy-pasteable example directly above that array covering both a repeated one-time event and a course. Each event needs, from **your own easyTable back-office** (not this codebase):
+
+- `typeId` — the booking type/room ID for wherever the event is held. Use a **dedicated room** per event category if you want its seats to stop competing with regular dinner reservations.
+- `productId` — the preorder product ID representing the event's ticket/course price (Preorder → Products in easyTable's settings, or ask their support to set it up).
+- `location` — `'rodizio'`, `'alacarte'`, or `'events'` (the last needs `NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_EVENTS` set in `.env` if events live under their own separate "place" in easyTable).
+
+Until *both* `typeId` and `productId` are set on an event, its card shows an honest "contact us" fallback instead of a buy button that would fail.
+
+> **⚠️ Not yet live-tested.** Unlike table booking (verified against a real reservation earlier in this project), the preorder fields (`typeId`, `productId`, `forcePreorderPayment`, `qty`) are implemented from easyTable's published API docs but have not yet been exercised against a real event purchase. Test one for real — the same way the booking flow's two real bugs (an availability field name, a date format) were only found by actually calling the API — as soon as a real `typeId`/`productId` exist.
+
+---
+
 ## 🖼 Localising the media
 
 By default the content references the restaurant's live Wix CDN so you see the same photos **and videos** instantly. To self‑host:
@@ -124,7 +140,7 @@ If you set the easyTable env vars as secrets on your host (not committed to the 
 
 ## ⚙️ Environment variables
 
-**frontend/.env** — `NEXT_PUBLIC_EASYTABLE_API_KEY`, `NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN`, `NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_BAKFICKAN` (optional). All three are exposed to the browser by design — see *Table booking* above.
+**frontend/.env** — `NEXT_PUBLIC_EASYTABLE_API_KEY`, `NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN`, `NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_BAKFICKAN` (optional), `NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_EVENTS` (optional). All are exposed to the browser by design — see *Table booking* and *Events & tickets* above.
 
 ---
 

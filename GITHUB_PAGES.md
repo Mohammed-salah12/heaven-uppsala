@@ -10,6 +10,7 @@ The site content for all three languages is baked into the app at build time (`f
 NEXT_PUBLIC_EASYTABLE_API_KEY
 NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN
 NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_BAKFICKAN   (optional)
+NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_EVENTS      (optional — see README "Events & tickets")
 ```
 
 Remember: these ship inside the built JS by design (no backend to hold them) — anyone can read them via devtools. See the README for the full writeup.

@@ -616,12 +616,135 @@ const menuItems = [
   MI('drink-meny', 'wineBottleSparkling', 11, 3, '2000 kr', { sv: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, Frankrike', description: '' }, en: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, France', description: '' }, pt: { name: 'NV, Perrier-Jouët Blanc de Blancs, Champagne, França', description: '' } }),
 ];
 
-// ── Events (shown on the new Events page) ──
-// Intentionally empty — no real event dates/names exist yet, and inventing
-// some would mislead real customers on a live site. Add real events from the
-// admin dashboard's Events tab; the page shows an honest "no events yet"
-// message until then.
-const events = [];
+// ── Events (shown on the Events page AND a "What's On" teaser on home) ──
+// Intentionally empty — no real events exist yet, and inventing some would
+// mislead real customers on a live site. The events page/section shows an
+// honest "no events yet" / nothing-at-all state until real ones are added
+// here. There is no admin dashboard anymore (client-only site) — add an
+// event by pushing a new object into this array and redeploying.
+//
+// Each entry is either:
+//
+//   kind: 'ticketed' — a one-time event, or the SAME event repeated on
+//   several dates ("copied to multiple dates"). List every date in
+//   `dates`; each one becomes its OWN separate card with its own buy
+//   button and its own capacity, e.g. two Måla & Skåla nights a month
+//   apart are just two entries in the same `dates` array.
+//
+//   kind: 'course' — a continuous/recurring series sold as a single
+//   package (e.g. a 6-week dance course). Only ONE card is shown; give
+//   `dates: [{ date, time }]` with just the FIRST session (that's what
+//   the underlying easyTable booking uses), and describe the full
+//   recurrence in `scheduleLabel` for guests to read.
+//
+// `easytable.typeId` / `easytable.productId` come from easyTable's own
+// back-office, NOT from this codebase:
+//   - typeId  — the booking type/room ID for wherever this event is held.
+//     Recommended: a DEDICATED room/booking type per event category, so
+//     its seats don't compete with regular dinner reservations.
+//   - productId — the preorder product ID representing this event's
+//     ticket/course price (create it in easyTable's Preorder/Products
+//     settings, or ask easyTable support to set it up).
+//   - location — which existing place token to bill through: 'rodizio',
+//     'alacarte', or 'events' (the last one only works once
+//     NEXT_PUBLIC_EASYTABLE_PLACE_TOKEN_EVENTS is set in .env — see
+//     .env.example — for a fully separate easyTable "place").
+// Until BOTH typeId and productId are filled in for an event, its card
+// shows an honest "contact us to book" fallback instead of a buy button
+// that would fail — see isEventTicketingConfigured() in lib/easytable.js.
+//
+// Fully worked examples (commented out — copy, fill in, uncomment):
+//
+// const events = [
+//   {
+//     order: 1,
+//     kind: 'ticketed',
+//     image: 'https://example.com/mala-skala.jpg',
+//     price: 495, // SEK per ticket
+//     currency: 'SEK',
+//     dates: [
+//       { date: '2026-10-03', time: '17:00' },
+//       { date: '2026-10-17', time: '17:00' },
+//     ],
+//     translations: {
+//       sv: { title: 'Måla & Skåla', description: 'En kväll med målning, vin och gott sällskap.' },
+//       en: { title: 'Måla & Skåla (Paint & Toast)', description: 'An evening of painting, wine and good company.' },
+//       pt: { title: 'Måla & Skåla (Pinte & Brinde)', description: 'Uma noite de pintura, vinho e boa companhia.' },
+//     },
+//     easytable: { location: 'events', typeId: null, productId: null },
+//   },
+//   {
+//     order: 2,
+//     kind: 'course',
+//     image: 'https://example.com/dance-course.jpg',
+//     price: 1490, // SEK for the whole course
+//     currency: 'SEK',
+//     dates: [{ date: '2026-10-05', time: '18:00' }], // first session only
+//     scheduleLabel: {
+//       sv: 'Måndagar 18:00, 6 veckor, start 5 okt',
+//       en: 'Mondays 18:00, 6 weeks, starting 5 Oct',
+//       pt: 'Segundas 18:00, 6 semanas, a partir de 5 out',
+//     },
+//     translations: {
+//       sv: { title: 'Danskurs för nybörjare', description: 'Sex veckors nybörjarkurs i sällskapsdans.' },
+//       en: { title: 'Beginner dance course', description: 'A six-week beginner ballroom dance course.' },
+//       pt: { title: 'Curso de dança para iniciantes', description: 'Um curso de seis semanas de dança de salão para iniciantes.' },
+//     },
+//     easytable: { location: 'events', typeId: null, productId: null },
+//   },
+// ];
+//
+// ── DEMO DATA (temporary) ──
+// Two events below, marked `demo: true`, so a real demo of the feature can
+// be shown before real easyTable typeId/productId values exist. `demo: true`
+// makes the card render its full buy flow (qty stepper, contact form) and,
+// on submit, shows a clearly labeled "this is a demo" success state instead
+// of calling the real easyTable API — no fake booking is created and no
+// payment happens, and it's never presented as a real transaction. Photos
+// are the restaurant's own real images (already used elsewhere on the
+// site), not stock placeholders. Delete `demo: true` (and fill in the real
+// `easytable.typeId`/`productId`) once real events replace these, or just
+// delete these two entries outright.
+const events = [
+  {
+    order: 1,
+    kind: 'ticketed',
+    demo: true,
+    image: media.drinks,
+    price: 495,
+    currency: 'SEK',
+    dates: [
+      { date: '2026-10-03', time: '17:00' },
+      { date: '2026-10-17', time: '17:00' },
+    ],
+    translations: {
+      sv: { title: 'Måla & Skåla', description: 'En kväll med målning, vin och gott sällskap. Ta med dig en vän eller kom själv — inga förkunskaper krävs.' },
+      en: { title: 'Måla & Skåla (Paint & Toast)', description: 'An evening of painting, wine and good company. Bring a friend or come alone — no experience needed.' },
+      pt: { title: 'Måla & Skåla (Pinte & Brinde)', description: 'Uma noite de pintura, vinho e boa companhia. Venha com um amigo ou sozinho — nenhuma experiência necessária.' },
+    },
+    easytable: { location: 'events', typeId: null, productId: null },
+  },
+  {
+    order: 2,
+    kind: 'course',
+    demo: true,
+    image: media.dancers,
+    price: 1490,
+    currency: 'SEK',
+    dates: [{ date: '2026-10-05', time: '18:00' }],
+    scheduleLabel: {
+      sv: 'Måndagar 18:00, 6 veckor, start 5 okt',
+      en: 'Mondays 18:00, 6 weeks, starting 5 Oct',
+      pt: 'Segundas 18:00, 6 semanas, a partir de 5 out',
+    },
+    translations: {
+      sv: { title: 'Danskurs för nybörjare', description: 'Sex veckors nybörjarkurs i sällskapsdans, med Heavens egna instruktörer.' },
+      en: { title: 'Beginner dance course', description: "A six-week beginner ballroom dance course with Heaven's own instructors." },
+      pt: { title: 'Curso de dança para iniciantes', description: 'Um curso de seis semanas de dança de salão para iniciantes, com os instrutores do Heaven.' },
+    },
+    easytable: { location: 'events', typeId: null, productId: null },
+  },
+];
 
 // ── UI strings (nav, buttons, forms, labels) ──
 const ui = {
@@ -642,6 +765,26 @@ const ui = {
   'cta.events': { sv: 'Event', en: 'Events', pt: 'Eventos' },
   // Events page — honest empty state until real events are added.
   'events.empty': { sv: 'Inga event inbokade just nu — kika in igen snart!', en: 'No events scheduled right now — check back soon!', pt: 'Nenhum evento agendado no momento — volte em breve!' },
+  // "What's On" home teaser + shared event/ticket card strings.
+  'events.section.eyebrow': { sv: 'Heaven', en: 'Heaven', pt: 'Heaven' },
+  'events.section.title': { sv: 'Vad som händer', en: "What's On", pt: 'O que está rolando' },
+  'events.section.seeAll': { sv: 'Se alla event', en: 'See all events', pt: 'Ver todos os eventos' },
+  'events.kind.ticketed': { sv: 'Event', en: 'Event', pt: 'Evento' },
+  'events.kind.course': { sv: 'Kurs', en: 'Course', pt: 'Curso' },
+  'events.price.perTicket': { sv: '/ biljett', en: '/ ticket', pt: '/ bilhete' },
+  'events.price.perCourse': { sv: '/ kurs', en: '/ course', pt: '/ curso' },
+  'events.buy': { sv: 'Köp biljetter', en: 'Buy tickets', pt: 'Comprar bilhetes' },
+  'events.course.buy': { sv: 'Boka kursen', en: 'Book the course', pt: 'Reservar o curso' },
+  'events.qty.tickets': { sv: 'Antal biljetter', en: 'Number of tickets', pt: 'Número de bilhetes' },
+  'events.qty.course': { sv: 'Antal platser', en: 'Number of seats', pt: 'Número de vagas' },
+  'events.total': { sv: 'Totalt', en: 'Total', pt: 'Total' },
+  'events.pay.continue': { sv: 'Gå vidare till betalning', en: 'Continue to payment', pt: 'Continuar para o pagamento' },
+  'events.success': { sv: 'Nästan klart!', en: 'Almost there!', pt: 'Quase lá!' },
+  'events.success.detail': { sv: 'Din plats hålls kvar — slutför betalningen för att bekräfta den.', en: 'Your spot is being held — complete payment to confirm it.', pt: 'Sua vaga está reservada — conclua o pagamento para confirmá-la.' },
+  'events.fallback.text': { sv: 'Onlinebiljetter är inte öppna än — kontakta oss för att boka en plats.', en: "Online tickets aren't open yet — contact us to reserve a spot.", pt: 'Os ingressos online ainda não estão disponíveis — entre em contato para reservar uma vaga.' },
+  // Demo mode (temporary — see the "DEMO DATA" comment above the events array).
+  'events.demo.badge': { sv: 'Demo', en: 'Demo', pt: 'Demo' },
+  'events.demo.detail': { sv: 'Det här är en demo — ingen riktig bokning har gjorts och ingen betalning har dragits.', en: 'This is a demo — no real booking was made and no payment was charged.', pt: 'Isto é uma demonstração — nenhuma reserva real foi feita e nenhum pagamento foi cobrado.' },
   // "Boka bord" choice modal — asks the guest which dining experience to book.
   'booking.choose.title': { sv: 'Hur vill du äta?', en: 'How would you like to dine?', pt: 'Como você gostaria de jantar?' },
   'booking.choose.subtitle': { sv: 'Välj ett upplägg för att gå vidare till bokning.', en: 'Choose an experience to continue to booking.', pt: 'Escolha uma experiência para continuar com a reserva.' },
