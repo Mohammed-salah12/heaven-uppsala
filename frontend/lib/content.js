@@ -142,9 +142,9 @@ const pages = [
     slug: 'home', order: 1, inNav: true, navKey: 'nav.home', path: '/', isAnchor: false,
     heroImageUrl: media.heroPoster, heroVideoUrl: media.heroVideo,
     translations: {
-      sv: { title: 'This is Heaven', subtitle: 'Himmelska upplevelser i Uppsala' },
-      en: { title: 'This is Heaven', subtitle: 'Heavenly experiences in Uppsala' },
-      pt: { title: 'This is Heaven', subtitle: 'Experiências celestiais em Uppsala' },
+      sv: { title: 'This is Heaven', subtitle: 'En plats att äta, dricka, mötas & fira på' },
+      en: { title: 'This is Heaven', subtitle: 'A place to eat, drink, meet & celebrate' },
+      pt: { title: 'This is Heaven', subtitle: 'Um lugar para comer, beber, encontrar-se e celebrar' },
     },
     blocks: [
       B('pricing', { order: 1, anchor: 'buffe', tiers: [
@@ -856,7 +856,7 @@ const ui = {
   'label.getDirections': { sv: 'Vägbeskrivning', en: 'Get directions', pt: 'Como chegar' },
   'label.language': { sv: 'Språk', en: 'Language', pt: 'Idioma' },
   'label.scroll': { sv: 'Skrolla', en: 'Scroll', pt: 'Role' },
-  'hero.badge': { sv: 'Brasiliansk grill • Uppsala', en: 'Brazilian grill • Uppsala', pt: 'Grelha brasileira • Uppsala' },
+  'hero.badge': { sv: 'Himmelska upplevelser i Uppsala', en: 'Heavenly experiences in Uppsala', pt: 'Experiências celestiais em Uppsala' },
   'footer.tagline': { sv: 'Churrasco mitt i Uppsala', en: 'Churrasco in the heart of Uppsala', pt: 'Churrasco no coração de Uppsala' },
   'footer.rights': { sv: 'Alla rättigheter förbehållna', en: 'All rights reserved', pt: 'Todos os direitos reservados' },
   'footer.menu': { sv: 'Meny', en: 'Menu', pt: 'Menu' },
