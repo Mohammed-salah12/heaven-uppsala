@@ -170,28 +170,46 @@ const pages = [
       // "One place. Many experiences." — five offerings under one roof.
       // Restaurant reuses the real "Om oss" copy below; the other four are
       // clearly-flagged honest placeholder taglines until real copy is supplied.
-      B('experiences', { order: 0.5 }, // moved before pricing so it renders directly after the home "Upcoming events" section
+      // Six bookable "areas" of Heaven, each a picture + text card that links
+      // to its own dedicated subpage (see the PAGES entries below, one per
+      // slug here). `image`/`slug` are language-independent (base fields);
+      // title/subtitle/body/cta are localized per item, matched by index —
+      // same merge pattern as the pricing block's `tiers`.
+      B('experiences', {
+        order: 0.5, // moved before pricing so it renders directly after the home "Upcoming events" section
+        items: [
+          { image: media.skewers, slug: 'churrascaria' },
+          { image: media.bakDish, slug: 'restaurant' },
+          { image: media.bakDropin, slug: 'next-to-heaven' },
+          { image: media.bar, slug: 'lounge-cocktailbar' },
+          { image: media.dancers, slug: 'club-heaven' },
+          { image: media.fest, slug: 'atelier' },
+        ],
+      },
         {
-          sv: { heading: 'En plats. Många upplevelser.', subheading: 'Från churrasco till cocktails — fem sätt att uppleva Heaven.', items: [
-            { title: 'Restaurang', body: 'Vår churrascosal – brasiliansk grilltradition i en atmosfär av glädje och gemenskap.' },
-            { title: 'Lounge & Cocktailbar', body: 'Koppla av med välgjorda cocktails i en stilfull loungemiljö.' },
-            { title: 'Vincafé', body: 'En avslappnad plats för ett glas från vinlistan och något lätt att äta.' },
-            { title: 'Nightclub', body: 'Bra musik och härlig stämning när kvällen drar igång.' },
-            { title: 'Atelier', body: 'En mångsidig lokal för privata sammankomster och event.' },
+          sv: { heading: 'En plats. Många upplevelser.', subheading: 'Från brasiliansk churrasco och vin till cocktails, konst och nattliv. Upptäck de olika delarna av Heaven.', items: [
+            { title: 'Heaven Churrascaria', subtitle: 'Brasiliansk Rodizio', body: 'Eld, grill och brasiliansk tradition. Våra passadörer skär upp nygrillat kött direkt från spettet vid ditt bord.', cta: 'Utforska Churrasco' },
+            { title: 'Heaven Restaurant', subtitle: 'Middag · Mat · Vin', body: 'En à la carte-upplevelse med smaker inspirerade av Brasilien och hela världen. Perfekt för middag med vänner, familj eller kollegor.', cta: 'Utforska Restaurangen' },
+            { title: 'Next to Heaven', subtitle: 'Café · Vin · Socialt', body: 'Specialkaffe, matcha, trendiga drycker och milkshakes. Ett brett urval av viner på glas, smörrebröd och lättare rätter. Kaffe på dagen, vin på kvällen.', cta: 'Utforska Next To Heaven' },
+            { title: 'Lounge & Cocktailbar', subtitle: 'Cocktails · Musik · Folk', body: 'Kreativa cocktails, skön musik och en stilfull loungemiljö. Perfekt för en drink innan middagen eller en avslappnad kväll med vänner.', cta: 'Utforska Cocktailbaren' },
+            { title: 'Club Heaven', subtitle: 'Musik · Drinkar · Sena Kvällar', body: 'När middagen är slut fortsätter Heaven. DJs, klubbkvällar, cocktails och events långt in på natten.', cta: 'Utforska Club Heaven' },
+            { title: 'Atelier', subtitle: 'Måla · Skåla · Umgås', body: 'Kreativa kvällar med vin, mat och gott sällskap. Boka in dig på ett kommande tillfälle eller skapa ditt eget privata event.', cta: 'Utforska Atelier' },
           ] },
-          en: { heading: 'One place. Many experiences.', subheading: 'From churrasco to cocktails — five ways to experience Heaven.', items: [
-            { title: 'Restaurant', body: 'Our churrasco dining room — Brazilian grill tradition in an atmosphere of joy and togetherness.' },
-            { title: 'Lounge & Cocktail Bar', body: 'Relax with expertly crafted cocktails in a stylish lounge setting.' },
-            { title: 'Wine Cafe', body: 'A relaxed spot for a glass from our wine list and something light to eat.' },
-            { title: 'Nightclub', body: 'Great music and a lively atmosphere when the night gets going.' },
-            { title: 'Atelier', body: 'A versatile space for private gatherings and events.' },
+          en: { heading: 'One Place. Many Experiences.', subheading: 'From Brazilian churrasco and wine to cocktails, art and nightlife. Discover the different parts of Heaven.', items: [
+            { title: 'Heaven Churrascaria', subtitle: 'Brazilian Rodizio', body: 'Fire, grill and Brazilian tradition. Our passadores carve freshly grilled meat straight from the skewer at your table.', cta: 'Explore Churrascaria' },
+            { title: 'Heaven Restaurant', subtitle: 'Dinner · Food · Wine', body: 'An à la carte experience with flavors inspired by Brazil and the world. Perfect for dinner with friends, family or colleagues.', cta: 'Explore the Restaurant' },
+            { title: 'Next to Heaven', subtitle: 'Café · Wine · Social', body: 'Specialty coffee, matcha, trending drinks and milkshakes. A wide selection of wines by the glass, open sandwiches and lighter bites. Coffee by day, wine by night.', cta: 'Explore Next to Heaven' },
+            { title: 'Lounge & Cocktail Bar', subtitle: 'Cocktails · Music · People', body: 'Creative cocktails, great music and a stylish lounge setting. Perfect for a drink before dinner or a relaxed evening with friends.', cta: 'Explore the Cocktail Bar' },
+            { title: 'Club Heaven', subtitle: 'Music · Drinks · Late Nights', body: 'When dinner is over, Heaven keeps going. DJs, club nights, cocktails and events long into the night.', cta: 'Explore Club Heaven' },
+            { title: 'Atelier', subtitle: 'Paint · Toast · Mingle', body: 'Creative evenings with wine, food and good company. Book an upcoming session or create your own private event.', cta: 'Explore the Atelier' },
           ] },
-          pt: { heading: 'Um só lugar. Muitas experiências.', subheading: 'Do churrasco aos coquetéis — cinco formas de viver o Heaven.', items: [
-            { title: 'Restaurante', body: 'Nossa sala de churrasco — tradição da grelha brasileira em uma atmosfera de alegria e convívio.' },
-            { title: 'Lounge & Bar de Coquetéis', body: 'Relaxe com coquetéis bem preparados em um ambiente de lounge estiloso.' },
-            { title: 'Wine Cafe', body: 'Um espaço tranquilo para uma taça da nossa carta de vinhos e algo leve para comer.' },
-            { title: 'Nightclub', body: 'Boa música e clima animado quando a noite começa.' },
-            { title: 'Atelier', body: 'Um espaço versátil para encontros privados e eventos.' },
+          pt: { heading: 'Um Só Lugar. Muitas Experiências.', subheading: 'Do churrasco brasileiro e vinho a coquetéis, arte e vida noturna. Descubra as diferentes partes do Heaven.', items: [
+            { title: 'Heaven Churrascaria', subtitle: 'Rodízio Brasileiro', body: 'Fogo, grelha e tradição brasileira. Nossos passadores cortam a carne recém-grelhada direto do espeto à sua mesa.', cta: 'Explorar a Churrascaria' },
+            { title: 'Heaven Restaurant', subtitle: 'Jantar · Comida · Vinho', body: 'Uma experiência à la carte com sabores inspirados no Brasil e no mundo. Perfeito para um jantar com amigos, família ou colegas.', cta: 'Explorar o Restaurante' },
+            { title: 'Next to Heaven', subtitle: 'Café · Vinho · Social', body: 'Café especial, matcha, bebidas do momento e milkshakes. Uma ampla seleção de vinhos por taça, sanduíches abertos e pratos leves. Café de dia, vinho à noite.', cta: 'Explorar o Next to Heaven' },
+            { title: 'Lounge & Cocktailbar', subtitle: 'Coquetéis · Música · Pessoas', body: 'Coquetéis criativos, boa música e um ambiente de lounge estiloso. Perfeito para um drinque antes do jantar ou uma noite relaxada com amigos.', cta: 'Explorar o Bar de Coquetéis' },
+            { title: 'Club Heaven', subtitle: 'Música · Drinques · Noite Adentro', body: 'Quando o jantar termina, o Heaven continua. DJs, noites de clube, coquetéis e eventos até tarde da noite.', cta: 'Explorar o Club Heaven' },
+            { title: 'Atelier', subtitle: 'Pintar · Brindar · Confraternizar', body: 'Noites criativas com vinho, comida e boa companhia. Reserve uma próxima sessão ou crie seu próprio evento privado.', cta: 'Explorar o Atelier' },
           ] },
         }),
       B('split', { order: 2, anchor: 'ourstory', image: media.grill },
@@ -458,6 +476,156 @@ const pages = [
       pt: { title: 'Eventos', subtitle: 'O que está rolando no Heaven' },
     },
     blocks: [],
+  },
+
+  // ═══════════════════════ EXPERIENCE SUBPAGES ═══════════════════════
+  // One dedicated page per "Explore" card in the home page's experiences
+  // section (see the 'experiences' block above — slugs there must match
+  // these). Reached only via that section's buttons, not the main nav, so
+  // inNav: false — same pattern as /events. Content below is a first draft;
+  // happy to refine copy/photos once real material is available.
+  {
+    slug: 'churrascaria', order: 10, inNav: false, navKey: 'nav.churrascaria', path: '/churrascaria',
+    heroImageUrl: media.skewers,
+    translations: {
+      sv: { title: 'Heaven Churrascaria', subtitle: 'Brasiliansk Rodizio' },
+      en: { title: 'Heaven Churrascaria', subtitle: 'Brazilian Rodizio' },
+      pt: { title: 'Heaven Churrascaria', subtitle: 'Rodízio Brasileiro' },
+    },
+    blocks: [
+      B('split', { order: 1, image: media.grill, cta: 'book' },
+        {
+          sv: { eyebrow: 'Churrasco', heading: 'Rodizio, serverat vid bordet', body: 'Våra passadörer går runt med spett av nygrillat kött och skär upp det direkt vid ditt bord — en obegränsad rond av klassiska såväl som spännande köttsorter, alltid grillade med omsorg. Till detta serverar vi ett rikligt salladsbord och tillbehör.' },
+          en: { eyebrow: 'Churrasco', heading: 'Rodizio, carved at your table', body: 'Our passadores circle the room with skewers of freshly grilled meat, carving straight at your table — an unlimited round of classic and adventurous cuts alike, always grilled with care. Alongside it, a generous salad bar and sides.' },
+          pt: { eyebrow: 'Churrasco', heading: 'Rodízio, fatiado à sua mesa', body: 'Nossos passadores circulam com espetos de carne recém-grelhada e fatiam direto na sua mesa — uma rodada ilimitada de cortes clássicos e ousados, sempre grelhados com cuidado. Ao lado, uma generosa mesa de saladas e acompanhamentos.' },
+        }),
+      B('rich', { order: 2 },
+        {
+          sv: { eyebrow: 'Att veta', heading: 'Bra att veta', items: ['Obegränsat med kött direkt från spettet', 'Fullt salladsbord och varma tillbehör ingår', 'Perfekt för grupper, familjer och födelsedagar'] },
+          en: { eyebrow: 'Good to know', heading: 'Good to know', items: ['Unlimited meat carved straight from the skewer', 'Full salad bar and warm sides included', 'Perfect for groups, families and birthdays'] },
+          pt: { eyebrow: 'Bom saber', heading: 'Bom saber', items: ['Carne ilimitada, fatiada direto do espeto', 'Mesa de saladas completa e acompanhamentos quentes inclusos', 'Perfeito para grupos, famílias e aniversários'] },
+        }),
+    ],
+  },
+
+  {
+    slug: 'restaurant', order: 11, inNav: false, navKey: 'nav.restaurant', path: '/restaurant',
+    heroImageUrl: media.bakDish,
+    translations: {
+      sv: { title: 'Heaven Restaurant', subtitle: 'Middag · Mat · Vin' },
+      en: { title: 'Heaven Restaurant', subtitle: 'Dinner · Food · Wine' },
+      pt: { title: 'Heaven Restaurant', subtitle: 'Jantar · Comida · Vinho' },
+    },
+    blocks: [
+      B('split', { order: 1, image: media.dessert, cta: 'book' },
+        {
+          sv: { eyebrow: 'À la carte', heading: 'En meny utöver churrascon', body: 'Vid sidan om vår rodizio erbjuder vi en à la carte-meny med rätter inspirerade av Brasilien och övriga världen — perfekt för en lugn middag, en affärslunch eller en romantisk kväll. Komplettera gärna med ett glas från vår vinlista.' },
+          en: { eyebrow: 'À la carte', heading: 'A menu beyond the churrasco', body: 'Alongside our rodizio, we offer an à la carte menu with dishes inspired by Brazil and the wider world — perfect for a relaxed dinner, a business lunch or a romantic evening. Pair it with a glass from our wine list.' },
+          pt: { eyebrow: 'À la carte', heading: 'Um cardápio além do churrasco', body: 'Além do nosso rodízio, oferecemos um cardápio à la carte com pratos inspirados no Brasil e no mundo — perfeito para um jantar tranquilo, um almoço de negócios ou uma noite romântica. Combine com uma taça da nossa carta de vinhos.' },
+        }),
+      B('rich', { order: 2 },
+        {
+          sv: { eyebrow: 'Att veta', heading: 'Bra att veta', items: ['À la carte-meny varje kväll', 'Noggrant utvald vinlista', 'Bordsbokning för alla tillfällen'] },
+          en: { eyebrow: 'Good to know', heading: 'Good to know', items: ['À la carte menu every evening', 'A carefully curated wine list', 'Table bookings for every occasion'] },
+          pt: { eyebrow: 'Bom saber', heading: 'Bom saber', items: ['Cardápio à la carte todas as noites', 'Carta de vinhos cuidadosamente selecionada', 'Reservas de mesa para toda ocasião'] },
+        }),
+    ],
+  },
+
+  {
+    slug: 'next-to-heaven', order: 12, inNav: false, navKey: 'nav.nexttoheaven', path: '/next-to-heaven',
+    heroImageUrl: media.bakDropin,
+    translations: {
+      sv: { title: 'Next to Heaven', subtitle: 'Café · Vin · Socialt' },
+      en: { title: 'Next to Heaven', subtitle: 'Café · Wine · Social' },
+      pt: { title: 'Next to Heaven', subtitle: 'Café · Vinho · Social' },
+    },
+    blocks: [
+      B('split', { order: 1, image: media.bakMeal, cta: 'book' },
+        {
+          sv: { eyebrow: 'Drop in', heading: 'Kaffe på dagen, vin på kvällen', body: 'Next to Heaven är vår avslappnade mötesplats för specialkaffe, matcha och trendiga drycker på dagen, och ett brett urval av viner på glas när kvällen tar vid. Här serverar vi även smörrebröd och lättare rätter för dig som vill ta det lugnt.' },
+          en: { eyebrow: 'Drop in', heading: 'Coffee by day, wine by night', body: "Next to Heaven is our relaxed hangout for specialty coffee, matcha and trending drinks by day, and a wide selection of wines by the glass once evening comes around. We also serve open sandwiches and lighter bites for whenever you'd rather take it easy." },
+          pt: { eyebrow: 'Passe por aqui', heading: 'Café de dia, vinho à noite', body: 'O Next to Heaven é nosso espaço descontraído para café especial, matcha e bebidas do momento durante o dia, e uma ampla seleção de vinhos por taça quando a noite chega. Também servimos sanduíches abertos e pratos leves para quem quer relaxar.' },
+        }),
+      B('rich', { order: 2 },
+        {
+          sv: { eyebrow: 'Att veta', heading: 'Bra att veta', items: ['Öppet för drop in, ingen bokning krävs', 'Stort urval av kaffe, matcha och milkshakes', 'Viner på glas & lättare rätter'] },
+          en: { eyebrow: 'Good to know', heading: 'Good to know', items: ['Open for drop-in, no booking needed', 'Wide range of coffee, matcha and milkshakes', 'Wines by the glass & lighter bites'] },
+          pt: { eyebrow: 'Bom saber', heading: 'Bom saber', items: ['Aberto para passar sem reserva', 'Grande variedade de café, matcha e milkshakes', 'Vinhos por taça & pratos leves'] },
+        }),
+    ],
+  },
+
+  {
+    slug: 'lounge-cocktailbar', order: 13, inNav: false, navKey: 'nav.lounge', path: '/lounge-cocktailbar',
+    heroImageUrl: media.bar,
+    translations: {
+      sv: { title: 'Lounge & Cocktailbar', subtitle: 'Cocktails · Musik · Folk' },
+      en: { title: 'Lounge & Cocktail Bar', subtitle: 'Cocktails · Music · People' },
+      pt: { title: 'Lounge & Bar de Coquetéis', subtitle: 'Coquetéis · Música · Pessoas' },
+    },
+    blocks: [
+      B('split', { order: 1, image: media.drinks, cta: 'book' },
+        {
+          sv: { eyebrow: 'Cocktailbar', heading: 'Välgjorda cocktails i stilfull miljö', body: 'Våra bartenders blandar klassiska såväl som signaturcocktails med omsorg för detalj. Koppla av i vår lounge före middagen, eller stanna kvar en stund längre för god musik och skön stämning.' },
+          en: { eyebrow: 'Cocktail bar', heading: 'Expertly crafted cocktails in a stylish setting', body: 'Our bartenders mix classic and signature cocktails with care for detail. Unwind in our lounge before dinner, or stay a little longer for good music and a warm atmosphere.' },
+          pt: { eyebrow: 'Bar de coquetéis', heading: 'Coquetéis bem preparados em ambiente estiloso', body: 'Nossos bartenders preparam coquetéis clássicos e autorais com atenção aos detalhes. Relaxe em nosso lounge antes do jantar, ou fique um pouco mais para boa música e um clima agradável.' },
+        }),
+      B('rich', { order: 2 },
+        {
+          sv: { eyebrow: 'Att veta', heading: 'Bra att veta', items: ['Signaturcocktails & klassiker', 'Perfekt för en drink innan middagen', 'Avslappnad loungemiljö'] },
+          en: { eyebrow: 'Good to know', heading: 'Good to know', items: ['Signature cocktails & classics', 'Perfect for a drink before dinner', 'A relaxed lounge setting'] },
+          pt: { eyebrow: 'Bom saber', heading: 'Bom saber', items: ['Coquetéis autorais & clássicos', 'Perfeito para um drinque antes do jantar', 'Ambiente de lounge relaxante'] },
+        }),
+    ],
+  },
+
+  {
+    slug: 'club-heaven', order: 14, inNav: false, navKey: 'nav.clubheaven', path: '/club-heaven',
+    heroImageUrl: media.dancers,
+    translations: {
+      sv: { title: 'Club Heaven', subtitle: 'Musik · Drinkar · Sena Kvällar' },
+      en: { title: 'Club Heaven', subtitle: 'Music · Drinks · Late Nights' },
+      pt: { title: 'Club Heaven', subtitle: 'Música · Drinques · Noite Adentro' },
+    },
+    blocks: [
+      B('split', { order: 1, image: media.bar, cta: 'book' },
+        {
+          sv: { eyebrow: 'Nattliv', heading: 'Där kvällen fortsätter', body: 'När köken stänger tar Club Heaven vid. DJs, klubbkvällar och cocktails i en atmosfär som håller igång långt in på natten. Boka bord i förväg om ni vill säkra en plats redan från start.' },
+          en: { eyebrow: 'Nightlife', heading: 'Where the night keeps going', body: 'When the kitchens close, Club Heaven takes over. DJs, club nights and cocktails in an atmosphere that keeps going long into the night. Book a table in advance if you want a spot from the start.' },
+          pt: { eyebrow: 'Vida noturna', heading: 'Onde a noite continua', body: 'Quando as cozinhas fecham, o Club Heaven assume. DJs, noites de clube e coquetéis em um clima que segue até tarde da noite. Reserve uma mesa com antecedência se quiser garantir lugar desde o início.' },
+        }),
+      B('rich', { order: 2 },
+        {
+          sv: { eyebrow: 'Att veta', heading: 'Bra att veta', items: ['18+ · Öppet 22:00–03:00', 'DJs och klubbkvällar', 'Cocktails hela natten'] },
+          en: { eyebrow: 'Good to know', heading: 'Good to know', items: ['18+ · Open 22:00–03:00', 'DJs and club nights', 'Cocktails all night long'] },
+          pt: { eyebrow: 'Bom saber', heading: 'Bom saber', items: ['18+ · Aberto das 22h às 3h', 'DJs e noites de clube', 'Coquetéis a noite toda'] },
+        }),
+    ],
+  },
+
+  {
+    slug: 'atelier', order: 15, inNav: false, navKey: 'nav.atelier', path: '/atelier',
+    heroImageUrl: media.fest,
+    translations: {
+      sv: { title: 'Atelier', subtitle: 'Måla · Skåla · Umgås' },
+      en: { title: 'Atelier', subtitle: 'Paint · Toast · Mingle' },
+      pt: { title: 'Atelier', subtitle: 'Pintar · Brindar · Confraternizar' },
+    },
+    blocks: [
+      B('split', { order: 1, image: media.heroPoster, cta: 'book' },
+        {
+          sv: { eyebrow: 'Atelier', heading: 'En mångsidig lokal för kreativa kvällar', body: 'Atelier är vår mest flexibla lokal — perfekt för en målarkväll med vin, ett privat mingel eller ditt eget skräddarsydda event. Vi hjälper dig från idé till färdigt tillfälle.' },
+          en: { eyebrow: 'Atelier', heading: 'A versatile space for creative evenings', body: 'Atelier is our most flexible room — perfect for a paint-and-wine evening, a private mingle, or your own custom event. We help you from idea to finished occasion.' },
+          pt: { eyebrow: 'Atelier', heading: 'Um espaço versátil para noites criativas', body: 'O Atelier é nosso espaço mais flexível — perfeito para uma noite de pintura com vinho, um coquetel privado, ou seu próprio evento personalizado. Ajudamos da ideia à realização.' },
+        }),
+      B('rich', { order: 2 },
+        {
+          sv: { eyebrow: 'Att veta', heading: 'Bra att veta', items: ['Måla & Skåla-kvällar med jämna mellanrum', 'Möjlighet att boka privata event', 'Vin, mat och gott sällskap ingår'] },
+          en: { eyebrow: 'Good to know', heading: 'Good to know', items: ['Regular Paint & Toast evenings', 'Available to book for private events', 'Wine, food and good company included'] },
+          pt: { eyebrow: 'Bom saber', heading: 'Bom saber', items: ['Noites de Pintar & Brindar regulares', 'Disponível para reservar eventos privados', 'Vinho, comida e boa companhia incluídos'] },
+        }),
+    ],
   },
 ];
 
@@ -767,6 +935,9 @@ const ui = {
   'cta.dropin': { sv: 'Drop in-meny', en: 'Drop-in menu', pt: 'Cardápio drop-in' },
   'cta.explore': { sv: 'Utforska menyn', en: 'Explore the menu', pt: 'Explorar o cardápio' },
   'cta.events': { sv: 'Event', en: 'Events', pt: 'Eventos' },
+  // Fallback "Explore" button label for an experiences-section card in case
+  // an item is ever missing its own per-card cta text.
+  'experiences.cta': { sv: 'Utforska', en: 'Explore', pt: 'Explorar' },
   // Events page — honest empty state until real events are added.
   'events.empty': { sv: 'Inga event inbokade just nu — kika in igen snart!', en: 'No events scheduled right now — check back soon!', pt: 'Nenhum evento agendado no momento — volte em breve!' },
   // "What's On" home teaser + shared event/ticket card strings.

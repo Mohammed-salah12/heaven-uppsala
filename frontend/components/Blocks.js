@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Gallery from './Gallery';
 import NewsletterForm from './NewsletterForm';
 import BookingForm from './BookingForm';
@@ -121,8 +122,21 @@ export default function Blocks({ blocks = [], site }) {
                   <div className="experiences-grid">
                     {(block.items || []).map((it, j) => (
                       <div className="experience-card" key={j}>
-                        <h3>{it.title}</h3>
-                        {it.body && <p>{it.body}</p>}
+                        {it.image && (
+                          <div className="experience-card-media">
+                            <img src={it.image} alt={it.title || ''} />
+                          </div>
+                        )}
+                        <div className="experience-card-body">
+                          <h3>{it.title}</h3>
+                          {it.subtitle && <p className="experience-card-subtitle">{it.subtitle}</p>}
+                          {it.body && <p className="experience-card-desc">{it.body}</p>}
+                          {it.slug && (
+                            <Link className="btn btn-outline sm experience-card-cta" href={`/${it.slug}`}>
+                              {it.cta || t('experiences.cta')}
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

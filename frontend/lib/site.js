@@ -33,6 +33,15 @@ function resolveBlock(block, a) {
     const { tiers, ...rest } = loc; // eslint-disable-line no-unused-vars
     return { ...base, ...rest };
   }
+  if (block.type === 'experiences') {
+    // Merge each item's non-translated fields (image, slug) with its
+    // localized fields (title, subtitle, body, cta) by index — same pattern
+    // as pricing's `tiers` above.
+    const li = loc.items || [];
+    base.items = (block.items || []).map((it, i) => ({ ...it, ...(li[i] || {}) }));
+    const { items, ...rest } = loc; // eslint-disable-line no-unused-vars
+    return { ...base, ...rest };
+  }
   return { ...base, ...loc };
 }
 

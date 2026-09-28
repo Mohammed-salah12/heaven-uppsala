@@ -1,7 +1,11 @@
 import { notFound } from 'next/navigation';
 import SiteRoute from '@/components/SiteRoute';
 
-const KNOWN = ['bakfickan', 'konferens', 'festvaning', 'mat-meny', 'drink-meny', 'events'];
+const KNOWN = [
+  'bakfickan', 'konferens', 'festvaning', 'mat-meny', 'drink-meny', 'events',
+  // Experience subpages linked from the home page's experiences section.
+  'churrascaria', 'restaurant', 'next-to-heaven', 'lounge-cocktailbar', 'club-heaven', 'atelier',
+];
 
 // Pre-render these routes for the static (GitHub Pages) export.
 export function generateStaticParams() {
