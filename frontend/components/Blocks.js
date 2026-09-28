@@ -135,7 +135,7 @@ export default function Blocks({ blocks = [], site }) {
               <section className={cls} id={id} key={i}>
                 <div className="container">
                   <div className="gallery-head">
-                    <p className="eyebrow center">{t('hero.badge')}</p>
+                    {block.eyebrow && <p className="eyebrow center">{block.eyebrow}</p>}
                     <h2 className="display">{block.heading}</h2>
                   </div>
                   <Gallery images={block.images} variant="grid" />

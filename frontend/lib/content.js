@@ -142,9 +142,9 @@ const pages = [
     slug: 'home', order: 1, inNav: true, navKey: 'nav.home', path: '/', isAnchor: false,
     heroImageUrl: media.heroPoster, heroVideoUrl: media.heroVideo,
     translations: {
-      sv: { title: 'This is Heaven', subtitle: 'More than a restaurant. A place to eat, drink, meet & celebrate.' },
-      en: { title: 'This is Heaven', subtitle: 'More than a restaurant. A place to eat, drink, meet & celebrate.' },
-      pt: { title: 'This is Heaven', subtitle: 'More than a restaurant. A place to eat, drink, meet & celebrate.' },
+      sv: { title: 'This is Heaven', subtitle: 'Himmelska upplevelser i Uppsala' },
+      en: { title: 'This is Heaven', subtitle: 'Heavenly experiences in Uppsala' },
+      pt: { title: 'This is Heaven', subtitle: 'Experiências celestiais em Uppsala' },
     },
     blocks: [
       B('pricing', { order: 1, anchor: 'buffe', tiers: [
@@ -170,7 +170,7 @@ const pages = [
       // "One place. Many experiences." — five offerings under one roof.
       // Restaurant reuses the real "Om oss" copy below; the other four are
       // clearly-flagged honest placeholder taglines until real copy is supplied.
-      B('experiences', { order: 1.5 },
+      B('experiences', { order: 0.5 }, // moved before pricing so it renders directly after the home "Upcoming events" section
         {
           sv: { heading: 'En plats. Många upplevelser.', subheading: 'Från churrasco till cocktails — fem sätt att uppleva Heaven.', items: [
             { title: 'Restaurang', body: 'Vår churrascosal – brasiliansk grilltradition i en atmosfär av glädje och gemenskap.' },
@@ -218,9 +218,11 @@ const pages = [
           en: { eyebrow: 'Brazil', heading: 'Open until 03:00', body: ['Whether you are looking for a romantic dinner for two or a night with friends that stretches into the small hours, you are always welcome with us. Our restaurant is open until 03:00, giving you plenty of time to enjoy good food, drink and company.', 'Book a table here or call us on 018-505500.'] },
           pt: { eyebrow: 'Brazil', heading: 'Aberto até as 03:00', body: ['Seja um jantar romântico a dois ou uma noite com amigos que avança madrugada adentro, você é sempre bem-vindo. Nosso restaurante fica aberto até as 03:00, com tempo de sobra para aproveitar boa comida, bebida e companhia.', 'Reserve uma mesa aqui ou ligue para 018-505500.'] },
         }),
-      B('gallery', { order: 6, images: GALLERY },
+      B('gallery', { order: 0.6, images: GALLERY }, // moved right after the experiences section
         {
-          sv: { heading: 'Galleri' }, en: { heading: 'Gallery' }, pt: { heading: 'Galeria' },
+          sv: { eyebrow: 'Njut Av Utsikten', heading: 'Galleri' },
+          en: { eyebrow: 'Enjoy The View', heading: 'Gallery' },
+          pt: { eyebrow: 'Aproveite A Vista', heading: 'Galeria' },
         }),
       B('split', { order: 7, image: media.skewers },
         {
@@ -418,7 +420,9 @@ const pages = [
     blocks: [
       B('gallery', { order: 1, images: [media.food1, media.food2, media.food3] },
         {
-          sv: { heading: 'Från buffén' }, en: { heading: 'From the buffet' }, pt: { heading: 'Do buffet' },
+          sv: { eyebrow: 'Njut Av Utsikten', heading: 'Från buffén' },
+          en: { eyebrow: 'Enjoy The View', heading: 'From the buffet' },
+          pt: { eyebrow: 'Aproveite A Vista', heading: 'Do buffet' },
         }),
     ],
   },
@@ -766,8 +770,8 @@ const ui = {
   // Events page — honest empty state until real events are added.
   'events.empty': { sv: 'Inga event inbokade just nu — kika in igen snart!', en: 'No events scheduled right now — check back soon!', pt: 'Nenhum evento agendado no momento — volte em breve!' },
   // "What's On" home teaser + shared event/ticket card strings.
-  'events.section.eyebrow': { sv: 'Heaven', en: 'Heaven', pt: 'Heaven' },
-  'events.section.title': { sv: 'Vad som händer', en: "What's On", pt: 'O que está rolando' },
+  'events.section.eyebrow': { sv: 'Kommande event', en: 'Upcoming events', pt: 'Próximos eventos' },
+  'events.section.title': { sv: 'Vad händer på Heaven?', en: "What's Happening at Heaven?", pt: 'O Que Está Acontecendo no Heaven?' },
   'events.section.seeAll': { sv: 'Se alla event', en: 'See all events', pt: 'Ver todos os eventos' },
   'events.kind.ticketed': { sv: 'Event', en: 'Event', pt: 'Evento' },
   'events.kind.course': { sv: 'Kurs', en: 'Course', pt: 'Curso' },
